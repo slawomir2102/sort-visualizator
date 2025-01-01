@@ -29,7 +29,7 @@ import { Generator } from "./simulator/Generator.ts";
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function Simulator({
-  numberOfElements,
+  numberOfElements = 4,
   fromNumber,
   toNumber,
   selectedAlgorithm,
@@ -57,9 +57,18 @@ export default function Simulator({
   const [animationSpeed, setAnimationSpeed] = useState<number>(0);
   const forceToStopAnimationRef = useRef<boolean>(false);
 
+  const [elementIsSorted, setElementIsSorted] = useState<boolean>(false);
+  const [sortedIndexes, setSortedIndexes] = useState<number[]>([]);
+
   const sortSimulatorRef = useRef<SortSimulator>();
 
   const iconSize: number = 20;
+
+  const REVERSING = 1;
+  const NOTHING = 2;
+  const FORWARDING = 3;
+
+  let simulateDirection: number = NOTHING;
 
   useEffect(() => {
     if (!selectedAlgorithm) return;
@@ -97,6 +106,10 @@ export default function Simulator({
     highlightCurrentOperation();
   }, []);
 
+  useEffect(() => {
+    console.log("Aktualny stan sortedIndexes:", sortedIndexes);
+  }, [sortedIndexes]);
+
   if (numberOfElements > 20)
     return (
       <div>
@@ -115,6 +128,7 @@ export default function Simulator({
 
   const handlePrevStep = () => {
     getSimulator((simulator) => {
+      simulateDirection = REVERSING;
       simulator.prevStep();
       setCurrentStep(simulator.currentStep);
       highlightCurrentOperation();
@@ -124,11 +138,13 @@ export default function Simulator({
       );
 
       setDataToSort(simulator.currentState);
+      simulateDirection = NOTHING;
     });
   };
 
   const handleNextStep = () => {
     getSimulator((simulator) => {
+      simulateDirection = FORWARDING;
       simulator.nextStep();
       setCurrentStep(simulator.currentStep);
 
@@ -138,6 +154,7 @@ export default function Simulator({
       );
 
       setDataToSort(simulator.currentState);
+      simulateDirection = NOTHING;
     });
   };
 
@@ -147,7 +164,7 @@ export default function Simulator({
 
   const handleLastStep = () => {
     getSimulator((simulator) => {
-      handleGoToStepWithAnimation(simulator.numberOfLastStep);
+      handleGoToStepWithAnimation(simulator.numberOfTotalSteps);
     });
   };
 
@@ -158,6 +175,7 @@ export default function Simulator({
       setIsRunning(true);
 
       if (stepToGo > simulator.currentStep) {
+        simulateDirection = FORWARDING;
         for (let i = simulator.currentStep; i < stepToGo; i++) {
           if (animationSpeed !== 0) {
             await sleep(animationSpeed);
@@ -170,6 +188,7 @@ export default function Simulator({
       }
 
       if (stepToGo < simulator.currentStep) {
+        simulateDirection = REVERSING;
         for (let i = simulator.currentStep; i > stepToGo; i--) {
           if (animationSpeed !== 0) {
             await sleep(animationSpeed);
@@ -177,7 +196,6 @@ export default function Simulator({
           if (forceToStopAnimationRef.current) {
             break;
           }
-
           handlePrevStep();
         }
       }
@@ -186,6 +204,7 @@ export default function Simulator({
       // console.log(simulator.operations[simulator.operations.length]);
       // console.log(simulator.operations[simulator.operations.length - 1]);
       setIsRunning(false);
+      simulateDirection = NOTHING;
     });
   };
 
@@ -193,18 +212,42 @@ export default function Simulator({
     getSimulator((simulator) => {
       const currentOperation = simulator.operations[simulator.currentStep];
 
-      setActiveBoxIndexI(currentOperation.leftNumber);
-      setActiveBoxIndexJ(currentOperation.rightNumber);
-
       if (
+        !currentOperation.leftNumber ||
+        currentOperation.rightNumber ||
         currentOperation.pivot !== undefined ||
         currentOperation.rangeDown !== undefined ||
         currentOperation.rangeUp !== undefined
       ) {
-        setRangeDown(currentOperation.rangeDown);
-        setRangeUp(currentOperation.rangeUp);
-        setPivotIndex(currentOperation.pivot);
+        resetHighlight();
       }
+
+      setActiveBoxIndexI(currentOperation.leftNumber);
+      setActiveBoxIndexJ(currentOperation.rightNumber);
+      setRangeDown(currentOperation.rangeDown);
+      setRangeUp(currentOperation.rangeUp);
+      setPivotIndex(currentOperation.pivot);
+
+      if (currentOperation.indexSortedElement === undefined) {
+        return;
+      }
+
+      if (simulateDirection == REVERSING) {
+        setSortedIndexes((prev) => {
+          return prev.filter(
+            (index) => index !== currentOperation.indexSortedElement,
+          );
+        });
+      }
+      if (simulateDirection == FORWARDING) {
+        setSortedIndexes((prev) => {
+          return prev.includes(currentOperation.indexSortedElement)
+            ? prev
+            : [...prev, currentOperation.indexSortedElement];
+        });
+      }
+
+      setElementIsSorted(currentOperation.indexSortedElement);
     });
   };
 
@@ -322,6 +365,8 @@ export default function Simulator({
             const isRangeDown = index === rangeDown;
             const isRangeUp = index === rangeUp;
 
+            const isSorted = sortedIndexes.includes(index);
+
             return (
               <ChartBox
                 key={index}
@@ -332,6 +377,7 @@ export default function Simulator({
                 
                 
                 
+               
                
                 ${isActiveI ? "!bg-blue-300" : ""}
                 ${(isActiveI && isRangeDown) || isRangeDown ? "border-l-4 border-purple-500" : ""}
@@ -345,7 +391,8 @@ export default function Simulator({
                 ${isActiveJ && isRangeUp && isPivot ? "border-r-4 border-purple-500" : ""} 
                 
                 
-                ${isActiveI && isActiveJ && isRangeUp && isRangeDown && isPivot ? "border-l-4 border-r-4 border-purple-500 !bg-cyan-800" : ""} 
+                ${isActiveI && isActiveJ && isRangeUp && isRangeDown && isPivot ? "border-l-4 border-r-4 border-purple-500 !bg-cyan-800" : ""}
+                ${isSorted ? "!bg-pink-200" : ""} 
                 `}
               />
             );
@@ -414,6 +461,11 @@ export default function Simulator({
           <Button
             onPress={() => {
               console.log(sortSimulatorRef.current?.currentState);
+              console.log(
+                sortSimulatorRef.current?.currentStep,
+                " z ",
+                sortSimulatorRef.current?.numberOfLastStep,
+              );
             }}
           >
             cos

@@ -28,19 +28,33 @@ export class BubbleSortSimulator extends SortSimulator {
           swap = true;
         }
 
-        this.registerSwapOperation(j, j + 1, swap);
+        this.registerSwapOperation(
+          j,
+          j + 1,
+          swap,
+          // j == size - i - 1 - 1 ? (j == 0 ? j : j + 1) : undefined,
+        );
         swap = false;
       }
+
+      this._operations[cos] = {
+        ...this._operations[size - i - 1],
+        indexSortedElement: size - i - 1,
+      };
     }
+    this._operations[this._operations.length] = {
+      ...this._operations[this._operations.length],
+      indexSortedElement: 0,
+    };
 
     this.setSortedArray(arr);
+    console.log("czy posortowane poprawnie: ", this.checkIsSorted());
   }
 
   @MeasureExecutionTime
-  public sortWithoutSteps(ascending?: boolean) {
+  public sortWithoutSteps(ascending?: boolean): number[] {
     const arr = [...this._originalArray];
     const size = arr.length;
-    let counter = 0;
 
     for (let i = 0; i < size - 1; i++) {
       for (let j = 0; j < size - i - 1; j++) {
@@ -50,11 +64,9 @@ export class BubbleSortSimulator extends SortSimulator {
         ) {
           this.swap(arr, j, j + 1);
         }
-        counter++;
-        // do nothing
       }
     }
-    return counter;
+    return arr;
   }
 
   public generateCurrentStateDescription(stepNumber: number): string | "" {
@@ -103,7 +115,7 @@ export class BubbleSortSimulator extends SortSimulator {
       numberOfStepsWithoutSwaps: this._numberOfTotalSteps - this._swaps,
     });
 
-    for (let i = 0; i <= this.numberOfTotalSteps; i++) {
+    for (let i = 0; i < this.numberOfLastStep; i++) {
       steps.push({
         stepNumber: i,
         stepContent: {
@@ -118,6 +130,10 @@ export class BubbleSortSimulator extends SortSimulator {
           typeOperation: {
             name: this._operations[i]?.typeOperation || "unknown",
             isDone: this._operations[i]?.swapped,
+          },
+          sortedElement: {
+            index: this._operations[i]?.indexSortedElement,
+            //value: this._currentArray[this._operations[i].indexSortedElement],
           },
           comunnicate: {
             text: this.generateCurrentStateDescription(i),

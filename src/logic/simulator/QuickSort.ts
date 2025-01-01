@@ -8,12 +8,12 @@ export class QuickSortSimulator extends SortSimulator {
     this._sortType = "Quick Sort";
   }
 
-  private partition(
+  private async partition(
     arr: number[],
     low: number,
     high: number,
     ascending?: boolean,
-  ): number {
+  ): Promise<number> {
     const pivotIndex = high; // Wybór pivota
     const pivot = arr[pivotIndex]; // Pivot to element na końcu (po zamianie)
     let idx = low; // Initialize the index to start from the first element
@@ -21,7 +21,7 @@ export class QuickSortSimulator extends SortSimulator {
     for (let j = low; j < high; j++) {
       // Check if the current element should be swapped based on ascending/descending order
 
-      if ((arr[j] <= pivot && ascending) || (arr[j] >= pivot && !ascending)) {
+      if ((arr[j] < pivot && ascending) || (arr[j] > pivot && !ascending)) {
         this.swapS(arr, j, idx); // Swap if the condition matches
         this._operations.push({
           leftNumber: idx,
@@ -30,6 +30,7 @@ export class QuickSortSimulator extends SortSimulator {
           rangeDown: low,
           rangeUp: high,
           swapped: true,
+          typeOperation: "swap",
         });
 
         idx++; // Increment the index for next smaller element
@@ -41,6 +42,7 @@ export class QuickSortSimulator extends SortSimulator {
           rangeDown: low,
           rangeUp: high,
           swapped: false,
+          typeOperation: "compare",
         });
       }
     }
@@ -54,24 +56,51 @@ export class QuickSortSimulator extends SortSimulator {
       rangeDown: low,
       rangeUp: high,
       swapped: true,
+      typeOperation: "pivot-swap",
+      isSorted: true,
+      indexSortedElement: idx,
     });
 
     return idx; // Return the new pivot index
   }
 
-  private quickSortRecursive(
+  public isElementIsSorted(value: number): number {
+    return value;
+  }
+
+  private async quickSortRecursive(
     arr: number[],
     low: number,
     high: number,
     ascending?: boolean,
-  ): void {
-    if (low < high) {
-      const pivotIndex = this.partition(arr, low, high, ascending); // Partition the array
-
-      // Recursively sort the left and right subarrays
-      this.quickSortRecursive(arr, low, pivotIndex - 1, ascending); // Left subarray
-      this.quickSortRecursive(arr, pivotIndex + 1, high, ascending); // Right subarray
+  ): Promise<void> {
+    if (low >= high) {
+      this._operations.push({
+        leftNumber: low,
+        rightNumber: low,
+        pivot: low,
+        rangeDown: low,
+        rangeUp: low,
+        swapped: false,
+        typeOperation: "swap",
+        indexSortedElement: low,
+      });
+      return;
     }
+
+    const pivotIndex = await this.partition(arr, low, high, ascending); // Partition the array
+
+    this.quickSortRecursive(arr, low, pivotIndex - 1, ascending); // Left subarray
+    this.quickSortRecursive(arr, pivotIndex + 1, high, ascending); // Right subarray
+
+    //
+    // if (low < high) {
+    //   const pivotIndex = await this.partition(arr, low, high, ascending); // Partition the array
+    //
+    //   // Recursively sort the left and right subarrays
+    //   this.quickSortRecursive(arr, low, pivotIndex - 1, ascending); // Left subarray
+    //   this.quickSortRecursive(arr, pivotIndex + 1, high, ascending); // Right subarray
+    // }
   }
 
   @MeasureExecutionTime
@@ -85,13 +114,50 @@ export class QuickSortSimulator extends SortSimulator {
 
     // this._currentArray = arr; // Update the current state of the array
     this.setSortedArray(arr);
+    console.log("czy posortowane poprawnie: ", this.checkIsSorted());
   }
 
-  public sortWithoutSteps(ascending?: boolean) {
+  private partitionWithoutSteps(
+    arr: number[],
+    low: number,
+    high: number,
+    ascending?: boolean,
+  ): number {
+    const pivotIndex = high;
+    const pivot = arr[pivotIndex];
+    let idx = low;
+
+    for (let j = low; j < high; j++) {
+      if ((arr[j] < pivot && ascending) || (arr[j] > pivot && !ascending)) {
+        this.swap(arr, j, idx);
+        idx++;
+      }
+    }
+
+    this.swap(arr, idx, high);
+    return idx;
+  }
+
+  private quickSortRecursiveWithoutSteps(
+    arr: number[],
+    low: number,
+    high: number,
+    ascending?: boolean,
+  ): void {
+    if (low < high) {
+      const pivotIndex = this.partitionWithoutSteps(arr, low, high, ascending); // Partition the array
+
+      // Recursively sort the left and right subarrays
+      this.quickSortRecursiveWithoutSteps(arr, low, pivotIndex - 1, ascending); // Left subarray
+      this.quickSortRecursiveWithoutSteps(arr, pivotIndex + 1, high, ascending); // Right subarray
+    }
+  }
+
+  public sortWithoutSteps(ascending?: boolean): number[] {
     // This method can be implemented for quicksort without recording steps
     const arr = [...this._originalArray];
-    this.quickSortRecursive(arr, 0, arr.length - 1, ascending);
-    this._currentArray = arr;
+    this.quickSortRecursiveWithoutSteps(arr, 0, arr.length - 1, ascending);
+    return arr;
   }
 
   public generateJsonFile(): string {

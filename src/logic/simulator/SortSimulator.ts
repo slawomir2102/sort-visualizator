@@ -2,6 +2,7 @@ type operation = "swap" | "partition" | "merge";
 export type SortOperation = {
   leftNumber: number;
   rightNumber: number;
+  indexSortedElement?: number;
   typeOperation?: operation;
   swapped?: boolean;
   rangeDown?: number;
@@ -28,7 +29,7 @@ export abstract class SortSimulator {
     this._operations = [];
     this._numberOfTotalSteps = 0;
     this._currentStep = 0;
-    this.isSorted = false;
+    this._isSorted = false;
     this._swaps = 0;
     this._sortDirection = false;
   }
@@ -41,7 +42,7 @@ export abstract class SortSimulator {
   protected _operations: SortOperation[];
   protected _numberOfTotalSteps: number;
   protected _currentStep: number;
-  protected isSorted: boolean;
+  protected _isSorted: boolean;
   protected _swaps: number;
 
   protected executionTimes: Record<string, number> = {};
@@ -67,12 +68,16 @@ export abstract class SortSimulator {
     return this._sortedArray;
   }
 
+  public get isSorted(): boolean {
+    return this._isSorted;
+  }
+
   public get numberOfTotalSteps(): number {
-    return (this._numberOfTotalSteps = this._operations.length);
+    return this._operations.length;
   }
 
   public get numberOfLastStep(): number {
-    return (this._numberOfTotalSteps = this._operations.length - 1);
+    return Math.max(0, this.numberOfTotalSteps - 1);
   }
 
   public get operations(): SortOperation[] {
@@ -139,7 +144,7 @@ export abstract class SortSimulator {
 
   public abstract generateSteps(ascending?: boolean): void;
 
-  public abstract sortWithoutSteps(ascending?: boolean): void;
+  public abstract sortWithoutSteps(ascending?: boolean): number[];
 
   public abstract generateCurrentStateDescription(stepNumber: number): string;
 
@@ -147,16 +152,37 @@ export abstract class SortSimulator {
 
   // --------------- METODY WSPOLNE ----------------------------------------------------------------
 
+  public checkIsSorted(): boolean {
+    if (!this._sortedArray) {
+      return false;
+    }
+    const arrToCheck: number[] = this._sortedArray;
+    const correctArr: number[] = this.sortWithoutSteps(this._sortDirection);
+    const size = correctArr.length;
+    let correctCunter = 0;
+
+    for (let i: number = 0; i < size; i++) {
+      console.log(arrToCheck[i], "== ", correctArr[i]);
+      if (arrToCheck[i] == correctArr[i]) {
+        correctCunter++;
+      }
+    }
+    console.log(correctCunter);
+    return (this._isSorted = correctCunter == size);
+  }
+
   public registerSwapOperation(
     _leftNumber: number,
     _rightNumber: number,
     _swapped: boolean,
+    _indexSortedElement?: number,
   ): void {
     this._operations.push({
       leftNumber: _leftNumber,
       rightNumber: _rightNumber,
       typeOperation: "swap",
       swapped: _swapped,
+      indexSortedElement: _indexSortedElement,
     });
   }
 
@@ -178,44 +204,55 @@ export abstract class SortSimulator {
 
   // następny krok symulacji
   public nextStep(): number[] {
-    const { leftNumber, rightNumber, swapped, pivot } =
-      this._operations[this._currentStep];
-
-    if (swapped || (swapped && pivot)) {
-      this.swap(this._currentArray, leftNumber, rightNumber);
+    if (this._currentStep >= this.numberOfLastStep) {
+      return this.currentState;
     }
 
-    if (this._currentStep < this.numberOfLastStep) {
-      this._currentStep++;
+    const operation = this._operations[this._currentStep];
+    if (operation.swapped) {
+      this.swap(
+        this._currentArray,
+        operation.leftNumber,
+        operation.rightNumber,
+      );
     }
 
+    this._currentStep++;
     return this.currentState;
   }
 
   // poprzedni krok symulacji
   public prevStep(): number[] {
-    if (this._currentStep > 0) {
-      this._currentStep--;
+    if (this._currentStep <= 0) {
+      return this.currentState;
     }
 
-    const { leftNumber, rightNumber, swapped, pivot } =
-      this._operations[this._currentStep];
+    this._currentStep--;
 
-    if (swapped || (swapped && pivot)) {
-      this.swap(this._currentArray, leftNumber, rightNumber);
+    const operation = this._operations[this._currentStep];
+    if (operation.swapped) {
+      this.swap(
+        this._currentArray,
+        operation.leftNumber,
+        operation.rightNumber,
+      );
     }
 
     return this.currentState;
   }
 
   @MeasureExecutionTime
-  public goToStep(stepToGo: number): number[] | null {
-    if (stepToGo <= 0 || stepToGo > this.numberOfLastStep) {
+  public goToStep(stepToGo: number): number[] {
+    if (stepToGo < 0 || stepToGo > this.numberOfLastStep) {
       console.error(
         `W warunku stepToGo < 0 || stepToGo > this.numberOfLastStep w funkcji goToStep`,
         `Zmienne miały wartości ${stepToGo} < 0 || ${stepToGo} > ${this.numberOfLastStep} wystąpił błąd`,
       );
-      return null;
+      return this.currentState;
+    }
+
+    if (stepToGo === this._currentStep) {
+      return this.currentState;
     }
 
     if (stepToGo > this._currentStep) {
@@ -254,7 +291,7 @@ export abstract class SortSimulator {
     this._currentArray = [];
     this._operations = [];
     this._currentStep = 0;
-    this.isSorted = false;
+    this._isSorted = false;
     this._swaps = 0;
   }
 }
