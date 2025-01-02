@@ -17,9 +17,11 @@ export class BubbleSortSimulator extends SortSimulator {
     const size = arr.length;
 
     let swap = false;
+    let counter = 0;
 
     for (let i = 0; i < size - 1; i++) {
-      for (let j = 0; j < size - i - 1; j++) {
+      let j = 0;
+      for (j; j < size - i - 1; j++) {
         if (
           (!ascending && arr[j] > arr[j + 1]) ||
           (ascending && arr[j] < arr[j + 1])
@@ -37,8 +39,10 @@ export class BubbleSortSimulator extends SortSimulator {
         swap = false;
       }
 
-      this._operations[cos] = {
-        ...this._operations[size - i - 1],
+      counter = counter + j;
+
+      this._operations[counter] = {
+        ...this._operations[counter],
         indexSortedElement: size - i - 1,
       };
     }

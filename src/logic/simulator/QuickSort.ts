@@ -21,7 +21,7 @@ export class QuickSortSimulator extends SortSimulator {
     for (let j = low; j < high; j++) {
       // Check if the current element should be swapped based on ascending/descending order
 
-      if ((arr[j] < pivot && ascending) || (arr[j] > pivot && !ascending)) {
+      if ((arr[j] > pivot && ascending) || (arr[j] < pivot && !ascending)) {
         this.swapS(arr, j, idx); // Swap if the condition matches
         this._operations.push({
           leftNumber: idx,
@@ -128,7 +128,7 @@ export class QuickSortSimulator extends SortSimulator {
     let idx = low;
 
     for (let j = low; j < high; j++) {
-      if ((arr[j] < pivot && ascending) || (arr[j] > pivot && !ascending)) {
+      if ((arr[j] > pivot && !ascending) || (arr[j] < pivot && ascending)) {
         this.swap(arr, j, idx);
         idx++;
       }

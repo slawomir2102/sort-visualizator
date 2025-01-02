@@ -1,5 +1,8 @@
 import {
   Button,
+  Card,
+  CardBody,
+  CardHeader,
   Divider,
   Input,
   Modal,
@@ -22,22 +25,24 @@ import {
   MdInfo,
   MdKeyboardDoubleArrowLeft,
   MdKeyboardDoubleArrowRight,
+  MdStop,
 } from "react-icons/md";
 import { IoMdArrowRoundBack, IoMdArrowRoundForward } from "react-icons/io";
-import { Generator } from "./simulator/Generator.ts";
+import { sortDirectionType } from "../pages/visualizator/Visualizator.tsx";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function Simulator({
+  deliveredDataToSort,
   numberOfElements = 4,
-  fromNumber,
-  toNumber,
   selectedAlgorithm,
+  deliveredSortDirection,
 }: {
+  deliveredDataToSort: number[];
   numberOfElements: number;
-  fromNumber: number;
-  toNumber: number;
+
   selectedAlgorithm: string;
+  deliveredSortDirection: sortDirectionType;
 }) {
   const [dataToSort, setDataToSort] = useState<number[]>([]);
   const [currentStep, setCurrentStep] = useState<number | null>();
@@ -57,7 +62,7 @@ export default function Simulator({
   const [animationSpeed, setAnimationSpeed] = useState<number>(0);
   const forceToStopAnimationRef = useRef<boolean>(false);
 
-  const [elementIsSorted, setElementIsSorted] = useState<boolean>(false);
+  const [elementIsSorted, setElementIsSorted] = useState(false);
   const [sortedIndexes, setSortedIndexes] = useState<number[]>([]);
 
   const sortSimulatorRef = useRef<SortSimulator>();
@@ -71,10 +76,10 @@ export default function Simulator({
   let simulateDirection: number = NOTHING;
 
   useEffect(() => {
+    if (!deliveredDataToSort || deliveredDataToSort.length === 0) return;
     if (!selectedAlgorithm) return;
 
     let sortSimulator;
-    const generator = new Generator();
 
     switch (selectedAlgorithm) {
       case "bubbleSort":
@@ -88,17 +93,16 @@ export default function Simulator({
         break;
     }
 
-    sortSimulatorRef.current = sortSimulator;
+    sortSimulator.setData(deliveredDataToSort);
 
-    const data = generator.generateArrayOfRandomData(
-      fromNumber,
-      toNumber,
-      numberOfElements,
-    );
-    sortSimulator.setData(data);
-    sortSimulator.generateSteps();
-    // console.log(sortSimulator.sortWithoutSteps());
-    // console.log(sortSimulator.numberOfTotalSteps);
+    let sortDirection: boolean;
+    deliveredSortDirection === "ASCENDING"
+      ? (sortDirection = SortSimulator.ASCENDING)
+      : (sortDirection = SortSimulator.DESCENDING);
+    console.log(sortDirection);
+    sortSimulator.generateSteps(sortDirection);
+
+    sortSimulatorRef.current = sortSimulator;
 
     setDataToSort(sortSimulator.currentState);
     setCurrentStep(sortSimulator.currentStep);
@@ -315,7 +319,7 @@ export default function Simulator({
 
   return (
     <div className={"w-3/4"}>
-      <div className={"flex flex-col gap-xl  justify-center"}>
+      <div className={"flex flex-col gap-xl  justify-center "}>
         {" "}
         <Modal size={"2xl"} isOpen={isOpen} onOpenChange={onOpenChange}>
           <ModalContent>
@@ -356,7 +360,7 @@ export default function Simulator({
             )}
           </ModalContent>
         </Modal>
-        <div className={"flex flex-row items-end justify-between "}>
+        <div className={"flex flex-row items-end justify-between h-40"}>
           {dataToSort.map((item, index) => {
             const isActiveI = index === activeBoxIndexI;
             const isActiveJ = index === activeBoxIndexJ;
@@ -398,108 +402,128 @@ export default function Simulator({
             );
           })}
         </div>
-        <div className={"flex flex-row justify-evenly gap-lg"}>
-          <Button
-            color={"primary"}
-            isDisabled={isRunning}
-            onPress={handleFirstStep}
-          >
-            <MdKeyboardDoubleArrowLeft size={iconSize} />
-          </Button>
-
-          <Button
-            color={"primary"}
-            isDisabled={isRunning}
-            onPress={handlePrevStep}
-          >
-            <IoMdArrowRoundBack size={iconSize} />
-          </Button>
-
-          <Button isDisabled={true} disabled={true}>
-            {currentStep}
-          </Button>
-
-          <Button
-            color={"primary"}
-            isDisabled={isRunning}
-            onPress={handleNextStep}
-          >
-            <IoMdArrowRoundForward size={iconSize} />
-          </Button>
-
-          <Button
-            color={"primary"}
-            isDisabled={isRunning}
-            onPress={handleLastStep}
-          >
-            <MdKeyboardDoubleArrowRight size={iconSize} />
-          </Button>
-
-          <Button
-            isDisabled={forceToStopAnimationRef.current}
-            color={"primary"}
-            onPress={handleToStop}
-          >
-            Stop
-          </Button>
-        </div>
-        <div className={"flex flex-row items-center justify-between gap-lg"}>
-          <p>
-            Przejdź do kroku [0 - {sortSimulatorRef.current?.numberOfLastStep}]
-          </p>
-          <Input
-            onChange={(e) => setStepToGo(Number(e.target.value))}
-            className={"max-w-16"}
-          />
-          <Button
-            color={"primary"}
-            isDisabled={isRunning}
-            onPress={() => handleGoToStepWithAnimation(stepToGo)}
-          >
-            Przejdź
-          </Button>
-          <Button
-            onPress={() => {
-              console.log(sortSimulatorRef.current?.currentState);
-              console.log(
-                sortSimulatorRef.current?.currentStep,
-                " z ",
-                sortSimulatorRef.current?.numberOfLastStep,
-              );
-            }}
-          >
-            cos
-          </Button>
-        </div>
-        <div className={"flex flex-row items-center justify-between"}>
-          <Select
-            className={"max-w-52"}
-            label="Wybierz szybkość animacji"
-            defaultSelectedKeys={["instant"]}
-            selectedKeys={[animationType]}
-            onChange={handleAnimationTypeChoose}
-          >
-            {animationTypes.map((animation) => (
-              <SelectItem key={animation.key}>{animation.label}</SelectItem>
-            ))}
-          </Select>
-          <Button color={"primary"} onPress={onOpen}>
-            <MdInfo size={iconSize} />
-          </Button>
-        </div>
         <div>
           <Textarea label="Opis" disabled={true} value={stepDescription} />
         </div>
-        <div className={"flex flex-row items-center justify-between gap-lg"}>
-          <p>Wygeneruj plik json z listami kroków</p>
-          <Button
-            color={"primary"}
-            isDisabled={isRunning}
-            onPress={handleDownloadJSONFile}
-          >
-            <MdDownload size={iconSize} />
-            Zapisz
-          </Button>
+        <div className={"flex flex-row justify-between"}>
+          <Card>
+            <CardHeader>
+              <h2 className={""}>Sterowanie symulatorem</h2>
+            </CardHeader>
+            <CardBody className={"flex flex-row justify-evenly gap-lg"}>
+              <Button
+                color={"primary"}
+                isDisabled={isRunning}
+                onPress={handleFirstStep}
+              >
+                <MdKeyboardDoubleArrowLeft size={iconSize} />
+                Pierwszy krok
+              </Button>
+
+              <Button
+                color={"primary"}
+                isDisabled={isRunning}
+                onPress={handlePrevStep}
+              >
+                <IoMdArrowRoundBack size={iconSize} /> Poprzedni Krok
+              </Button>
+
+              <Button isDisabled={true} disabled={true}>
+                {currentStep}
+              </Button>
+
+              <Button
+                color={"primary"}
+                isDisabled={isRunning}
+                onPress={handleNextStep}
+              >
+                Następny krok
+                <IoMdArrowRoundForward size={iconSize} />
+              </Button>
+
+              <Button
+                color={"primary"}
+                isDisabled={isRunning}
+                onPress={handleLastStep}
+              >
+                Ostatni krok
+                <MdKeyboardDoubleArrowRight size={iconSize} />
+              </Button>
+            </CardBody>
+          </Card>
+          <Card>
+            <CardHeader>
+              <h2>Skoczek</h2>
+            </CardHeader>
+            <CardBody
+              className={"flex flex-row justify-evenly items-center gap-lg"}
+            >
+              <p>
+                Skocz do kroku
+                {/*Skocz do kroku [0 - {sortSimulatorRef.current?.numberOfLastStep}*/}
+                {/*]*/}
+              </p>
+              <Input
+                onChange={(e) => setStepToGo(Number(e.target.value))}
+                className={"max-w-16"}
+              />
+              <Button
+                color={"primary"}
+                isDisabled={isRunning}
+                onPress={() => handleGoToStepWithAnimation(stepToGo)}
+              >
+                Skocz
+              </Button>
+            </CardBody>
+          </Card>
+        </div>
+        <div className={"flex flex-row justify-between "}>
+          <Card className={"w-1/2"}>
+            <CardHeader>
+              <h2>Sterowanie animacją</h2>
+            </CardHeader>
+            <CardBody className={"flex flex-row items-center gap-x-lg"}>
+              <Select
+                label="Wybierz szybkość animacji"
+                defaultSelectedKeys={["instant"]}
+                selectedKeys={[animationType]}
+                onChange={handleAnimationTypeChoose}
+              >
+                {animationTypes.map((animation) => (
+                  <SelectItem key={animation.key}>{animation.label}</SelectItem>
+                ))}
+              </Select>
+              <Button
+                isDisabled={forceToStopAnimationRef.current}
+                color={"primary"}
+                onPress={handleToStop}
+              >
+                Stop
+                <MdStop size={iconSize} />
+              </Button>
+            </CardBody>
+          </Card>
+          <Card>
+            <CardHeader>
+              <h2>Zrzut symulacji</h2>
+            </CardHeader>
+            <CardBody className={"flex flex-row items-center  gap-lg"}>
+              <p>Wygeneruj plik json z listami kroków</p>
+              <Button
+                color={"primary"}
+                isDisabled={isRunning}
+                onPress={handleDownloadJSONFile}
+              >
+                Zapisz
+                <MdDownload size={iconSize} />
+              </Button>
+
+              <Button color={"primary"} onPress={onOpen}>
+                Info
+                <MdInfo size={iconSize} />
+              </Button>
+            </CardBody>
+          </Card>
         </div>
       </div>
     </div>
