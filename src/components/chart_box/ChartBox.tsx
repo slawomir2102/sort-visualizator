@@ -1,18 +1,15 @@
 import { motion } from "framer-motion";
-import { CSSProperties } from "react";
 
 export default function ChartBox({
   index,
   label,
   height,
   className,
-  style,
 }: {
   index: number;
   label: number;
   height: number;
   className: string;
-  style?: CSSProperties;
 }) {
   return (
     <div className="flex w-8 flex-col">

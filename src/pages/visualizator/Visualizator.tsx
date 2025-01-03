@@ -46,7 +46,7 @@ const Visualizator = () => {
     Array<string>
   >(Array(numberOfElements).fill(""));
 
-  const [dataToSort, setdataToSort] = useState<number[]>();
+  const [dataToSort, setdataToSort] = useState<number[]>([]);
 
   const [sortDirection, setSortDirection] =
     useState<sortDirectionType>("ASCENDING");
@@ -165,9 +165,11 @@ const Visualizator = () => {
                     defaultSelected
                     size="md"
                     onChange={() => {
-                      sortDirection === "ASCENDING"
-                        ? setSortDirection("DESCENDING")
-                        : setSortDirection("ASCENDING");
+                      if (sortDirection === "ASCENDING") {
+                        setSortDirection("DESCENDING");
+                      } else {
+                        setSortDirection("ASCENDING");
+                      }
                     }}
                   />
                   <p>{sortDirection}</p>
@@ -371,7 +373,6 @@ const Visualizator = () => {
             {simulate && !isLoading && (
               <Simulator
                 deliveredDataToSort={dataToSort}
-                numberOfElements={numberOfElements}
                 selectedAlgorithm={sortType}
                 deliveredSortDirection={sortDirection}
               />

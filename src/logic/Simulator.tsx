@@ -34,13 +34,10 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function Simulator({
   deliveredDataToSort,
-  numberOfElements = 4,
   selectedAlgorithm,
   deliveredSortDirection,
 }: {
   deliveredDataToSort: number[];
-  numberOfElements: number;
-
   selectedAlgorithm: string;
   deliveredSortDirection: sortDirectionType;
 }) {
@@ -49,21 +46,21 @@ export default function Simulator({
   const [stepToGo, setStepToGo] = useState<number>(0);
   const [stepDescription, setStepDescription] = useState<string>("");
 
+  // wizualizator
   const [activeBoxIndexI, setActiveBoxIndexI] = useState<number | null>(null);
   const [activeBoxIndexJ, setActiveBoxIndexJ] = useState<number | null>(null);
   const [pivotIndex, setPivotIndex] = useState<number | undefined>();
   const [rangeDown, setRangeDown] = useState<number | undefined>();
   const [rangeUp, setRangeUp] = useState<number | undefined>();
+  const [sortedIndexes, setSortedIndexes] = useState<number[]>([]);
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
+  // animacja
   const [isRunning, setIsRunning] = useState(false);
   const [animationType, setAnimationType] = useState<string>("");
   const [animationSpeed, setAnimationSpeed] = useState<number>(0);
   const forceToStopAnimationRef = useRef<boolean>(false);
-
-  const [elementIsSorted, setElementIsSorted] = useState(false);
-  const [sortedIndexes, setSortedIndexes] = useState<number[]>([]);
 
   const sortSimulatorRef = useRef<SortSimulator>();
 
@@ -96,9 +93,11 @@ export default function Simulator({
     sortSimulator.setData(deliveredDataToSort);
 
     let sortDirection: boolean;
-    deliveredSortDirection === "ASCENDING"
-      ? (sortDirection = SortSimulator.ASCENDING)
-      : (sortDirection = SortSimulator.DESCENDING);
+    if (deliveredSortDirection === "ASCENDING") {
+      sortDirection = SortSimulator.ASCENDING;
+    } else {
+      sortDirection = SortSimulator.DESCENDING;
+    }
     console.log(sortDirection);
     sortSimulator.generateSteps(sortDirection);
 
@@ -113,15 +112,6 @@ export default function Simulator({
   useEffect(() => {
     console.log("Aktualny stan sortedIndexes:", sortedIndexes);
   }, [sortedIndexes]);
-
-  if (numberOfElements > 20)
-    return (
-      <div>
-        <p>
-          Za dużo elementów. Do wizualizacji maksymalnie musi być 16 elementów
-        </p>
-      </div>
-    );
 
   const getSimulator = (callback: (simulator: SortSimulator) => void) => {
     if (!sortSimulatorRef.current) {
@@ -203,10 +193,7 @@ export default function Simulator({
           handlePrevStep();
         }
       }
-      // console.log(simulator.currentStep);
-      // console.log(simulator.operations.length);
-      // console.log(simulator.operations[simulator.operations.length]);
-      // console.log(simulator.operations[simulator.operations.length - 1]);
+
       setIsRunning(false);
       simulateDirection = NOTHING;
     });
@@ -216,52 +203,31 @@ export default function Simulator({
     getSimulator((simulator) => {
       const currentOperation = simulator.operations[simulator.currentStep];
 
-      if (
-        !currentOperation.leftNumber ||
-        currentOperation.rightNumber ||
-        currentOperation.pivot !== undefined ||
-        currentOperation.rangeDown !== undefined ||
-        currentOperation.rangeUp !== undefined
-      ) {
-        resetHighlight();
-      }
-
       setActiveBoxIndexI(currentOperation.leftNumber);
       setActiveBoxIndexJ(currentOperation.rightNumber);
-      setRangeDown(currentOperation.rangeDown);
-      setRangeUp(currentOperation.rangeUp);
-      setPivotIndex(currentOperation.pivot);
 
-      if (currentOperation.indexSortedElement === undefined) {
-        return;
+      if (selectedAlgorithm === "quickSort") {
+        setRangeDown(currentOperation.rangeDown);
+        setRangeUp(currentOperation.rangeUp);
+        setPivotIndex(currentOperation.pivot);
       }
 
       if (simulateDirection == REVERSING) {
         setSortedIndexes((prev) => {
           return prev.filter(
-            (index) => index !== currentOperation.indexSortedElement,
+            (index) => index !== Number(currentOperation.indexSortedElement),
           );
         });
       }
+
       if (simulateDirection == FORWARDING) {
-        setSortedIndexes((prev) => {
-          return prev.includes(currentOperation.indexSortedElement)
+        setSortedIndexes((prev: number[]): number[] => {
+          return prev.includes(currentOperation.indexSortedElement as number)
             ? prev
-            : [...prev, currentOperation.indexSortedElement];
+            : [...prev, Number(currentOperation.indexSortedElement)];
         });
       }
-
-      setElementIsSorted(currentOperation.indexSortedElement);
     });
-  };
-
-  // Helper function to reset highlights
-  const resetHighlight = () => {
-    setActiveBoxIndexI(null);
-    setActiveBoxIndexJ(null);
-    setRangeDown(undefined);
-    setRangeUp(undefined);
-    setPivotIndex(undefined);
   };
 
   const handleDownloadJSONFile = () => {
@@ -396,7 +362,9 @@ export default function Simulator({
                 
                 
                 ${isActiveI && isActiveJ && isRangeUp && isRangeDown && isPivot ? "border-l-4 border-r-4 border-purple-500 !bg-cyan-800" : ""}
-                ${isSorted ? "!bg-pink-200" : ""} 
+                
+                ${isSorted ? "!bg-pink-200" : ""}
+                 
                 `}
               />
             );

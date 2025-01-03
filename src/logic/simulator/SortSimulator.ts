@@ -1,4 +1,4 @@
-type operation = "swap" | "partition" | "merge";
+type operation = "swap" | "partition" | "pivot-swap" | "compare";
 export type SortOperation = {
   leftNumber: number;
   rightNumber: number;
@@ -299,7 +299,7 @@ export abstract class SortSimulator {
 // decorator do mierzenia czasu wykonania funkcji-----------------------------------------------------------------------
 
 export function MeasureExecutionTime(
-  target: object,
+  _target: object,
   propertyKey: string | symbol,
   descriptor: TypedPropertyDescriptor<any>,
 ): TypedPropertyDescriptor<any> | void {

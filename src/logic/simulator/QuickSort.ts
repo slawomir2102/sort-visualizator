@@ -57,7 +57,6 @@ export class QuickSortSimulator extends SortSimulator {
       rangeUp: high,
       swapped: true,
       typeOperation: "pivot-swap",
-      isSorted: true,
       indexSortedElement: idx,
     });
 
@@ -196,11 +195,11 @@ export class QuickSortSimulator extends SortSimulator {
           },
           rangeDown: {
             index: this._operations[i]?.rangeDown,
-            value: this._currentArray[this._operations[i]?.rangeDown],
+            value: this._currentArray[this._operations[i]?.rangeDown as number],
           },
           rangeUp: {
             index: this._operations[i]?.rangeUp,
-            value: this._currentArray[this._operations[i]?.rangeUp],
+            value: this._currentArray[this._operations[i]?.rangeUp as number],
           },
           comunnicate: {
             text: `${this._currentArray[this._operations[i]?.leftNumber]} zostało zamienione z ${this._currentArray[this._operations[i]?.rightNumber]} podczas operacji ${this._operations[i]?.typeOperation} która została wykonana ${this._operations[i]?.swapped}`,
@@ -219,5 +218,6 @@ export class QuickSortSimulator extends SortSimulator {
 
   public generateCurrentStateDescription(stepNumber: number): string {
     if (stepNumber < this.numberOfLastStep) return "";
+    return "";
   }
 }
