@@ -11,6 +11,7 @@ const Navigation = () => {
             className="flex flex-row items-center justify-between gap-xl"
             justify="center"
           >
+            <NavigationLink destination={"/home"} title={"home"} />
             <NavigationLink
               destination={"/visualizator"}
               title={"visualizator"}

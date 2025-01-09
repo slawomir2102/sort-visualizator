@@ -9,6 +9,9 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectItem,
   Spinner,
@@ -16,11 +19,13 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import Simulator from "../../logic/Simulator";
 
 import { Generator } from "../../logic/simulator/Generator.ts";
+import { MdInfo } from "react-icons/md";
+import PopoverWrapper from "../../components/popover_wrapper/PopoverWrapper.tsx";
 
 export type sortDirectionType = "ASCENDING" | "DESCENDING";
 
@@ -42,6 +47,8 @@ const Visualizator = () => {
   const [fromNumber, setFromNumber] = useState<number>(0);
   const [toNumber, setToNumber] = useState<number>(0);
 
+  const [trigger, setTrigger] = useState<boolean>(true);
+
   const [manualDataInputValues, setManualDataInputValues] = useState<
     Array<string>
   >(Array(numberOfElements).fill(""));
@@ -52,6 +59,9 @@ const Visualizator = () => {
     useState<sortDirectionType>("ASCENDING");
 
   // let dataToSort: number[] = [];
+  useEffect(() => {
+    checkIsArrayIsNotEmpty();
+  }, [manualDataInputValues]);
 
   const handleSetNumberOfElements = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -101,7 +111,10 @@ const Visualizator = () => {
     const selectedSimulator = e.target.value;
 
     setSortType(selectedSimulator);
+    console.log("selectedSimulator", selectedSimulator);
+
     if (selectedSimulator.length <= 0) {
+      console.log("false");
       setIsChoosedSortAlgoritm(false);
       return;
     }
@@ -128,9 +141,44 @@ const Visualizator = () => {
     setManualDataInputValues(stringArray);
   }
 
+  const [isArrayNotEmpty, setIsArrayNotEmpty] = useState<boolean>(false);
+
+  const checkIsArrayIsNotEmpty = () => {
+    let counter = 0;
+    for (let i = 0; i < manualDataInputValues.length; i++) {
+      if (manualDataInputValues[i] !== "") {
+        counter++;
+      }
+    }
+    if (counter === manualDataInputValues.length) {
+      setIsArrayNotEmpty(true);
+      return;
+    }
+    setIsArrayNotEmpty(false);
+    return;
+  };
+
+  function handleEraseData(): void {
+    const arr: string[] = [];
+    for (let i = 0; i < manualDataInputValues.length; i++) {
+      arr[i] = "";
+    }
+    setManualDataInputValues(arr);
+  }
+
   return (
     <div className={"flex w-full h-full flex-row justify-center gap-xl p-4"}>
-      <Card className={"w-1/4"}>
+      <Card className={"w-1/4 relative"}>
+        <Button
+          color={"primary"}
+          className={" absolute top-5 right-5 z-20"}
+          onPress={() => {
+            setTrigger(!trigger);
+          }}
+        >
+          <MdInfo color={"white"} size={20} />
+        </Button>
+
         <CardHeader className={"flex items-center justify-center"}>
           <h2>Opcje</h2>
         </CardHeader>
@@ -141,18 +189,27 @@ const Visualizator = () => {
                 className={"flex flex-row items-center justify-between gap-xl"}
               >
                 <p>Algorytm sortujący:</p>
-                <Select
-                  label="Select Sorting Algorithm"
-                  placeholder="Wybierz algorytm"
-                  selectedKeys={[sortType]}
-                  onChange={handleSelectionChange}
+
+                <PopoverWrapper
+                  content={"siema"}
+                  trigger={trigger}
+                  onTrigger={() => {
+                    setTrigger(false);
+                  }}
                 >
-                  {simulators.map((simulator) => (
-                    <SelectItem key={simulator.key}>
-                      {simulator.label}
-                    </SelectItem>
-                  ))}
-                </Select>
+                  <Select
+                    label="Select Sorting Algorithm"
+                    placeholder="Wybierz algorytm"
+                    selectedKeys={[sortType]}
+                    onChange={handleSelectionChange}
+                  >
+                    {simulators.map((simulator) => (
+                      <SelectItem key={simulator.key}>
+                        {simulator.label}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </PopoverWrapper>
               </div>
 
               <div
@@ -160,69 +217,30 @@ const Visualizator = () => {
               >
                 <p>Kierunek sortowania: </p>
 
-                <div className={"flex flex-row-reverse items-center gap-xl"}>
-                  <Switch
-                    defaultSelected
-                    size="md"
-                    onChange={() => {
-                      if (sortDirection === "ASCENDING") {
-                        setSortDirection("DESCENDING");
-                      } else {
-                        setSortDirection("ASCENDING");
-                      }
-                    }}
-                  />
-                  <p>{sortDirection}</p>
-                </div>
+                <PopoverWrapper
+                  content={"siema"}
+                  trigger={trigger}
+                  onTrigger={() => {
+                    setTrigger(false);
+                  }}
+                >
+                  <div className={"flex flex-row-reverse items-center gap-xl"}>
+                    <Switch
+                      defaultSelected
+                      size="md"
+                      onChange={() => {
+                        if (sortDirection === "ASCENDING") {
+                          setSortDirection("DESCENDING");
+                        } else {
+                          setSortDirection("ASCENDING");
+                        }
+                      }}
+                    />
+                    <p>{sortDirection}</p>
+                  </div>
+                </PopoverWrapper>
               </div>
             </div>
-
-            {/*<div className={"flex flex-col items-center gap-xl "}>*/}
-            {/*  <p className={"text-center"}>Generator danych</p>*/}
-
-            {/*  <div*/}
-            {/*    className={"flex flex-row items-center justify-between w-full"}*/}
-            {/*  >*/}
-            {/*    <p>Ilość elementów:</p>*/}
-
-            {/*    <Input*/}
-            {/*      type={"number"}*/}
-            {/*      defaultValue={"4"}*/}
-            {/*      min={"4"}*/}
-            {/*      max={"20"}*/}
-            {/*      className={"max-w-20"}*/}
-            {/*      onChange={handleSetNumberOfElements}*/}
-            {/*    />*/}
-            {/*  </div>*/}
-
-            {/*  <div*/}
-            {/*    className={"flex flex-row items-center justify-between w-full"}*/}
-            {/*  >*/}
-            {/*    <p>Dolny zakres:</p>*/}
-            {/*    <Input*/}
-            {/*      type={"number"}*/}
-            {/*      defaultValue={"0"}*/}
-            {/*      min={"0"}*/}
-            {/*      max={"999"}*/}
-            {/*      className={"max-w-20"}*/}
-            {/*      onChange={handleFromNumber}*/}
-            {/*    />*/}
-            {/*  </div>*/}
-
-            {/*  <div*/}
-            {/*    className={"flex flex-row items-center justify-between w-full"}*/}
-            {/*  >*/}
-            {/*    <p>Górny zakres:</p>*/}
-            {/*    <Input*/}
-            {/*      type={"number"}*/}
-            {/*      defaultValue={"0"}*/}
-            {/*      min={"0"}*/}
-            {/*      max={"999"}*/}
-            {/*      className={"max-w-20"}*/}
-            {/*      onChange={handleToNumber}*/}
-            {/*    />*/}
-            {/*  </div>*/}
-            {/*</div>*/}
 
             <div
               className={"flex flex-row items-center justify-between gap-xl "}
@@ -301,6 +319,7 @@ const Visualizator = () => {
                             />
                           </div>
                           <div className={"flex flex-row justify-end"}>
+                            <Button onPress={handleEraseData}>Wyczyść</Button>
                             <Button onPress={handleGenerateRandomNumbers}>
                               Generuj
                             </Button>
@@ -341,7 +360,11 @@ const Visualizator = () => {
                         >
                           Anuluj
                         </Button>
-                        <Button color="primary" onPress={onClose}>
+                        <Button
+                          color="primary"
+                          onPress={onClose}
+                          isDisabled={!isArrayNotEmpty}
+                        >
                           Zaakceptuj dane
                         </Button>
                       </ModalFooter>
@@ -352,7 +375,7 @@ const Visualizator = () => {
             </div>
 
             <Button
-              disabled={!isChoosedSortAlgoritm}
+              isDisabled={!isChoosedSortAlgoritm || !isArrayNotEmpty}
               onPress={handleSimulationClick}
             >
               Symuluj

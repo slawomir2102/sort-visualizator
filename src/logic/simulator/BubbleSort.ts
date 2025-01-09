@@ -1,4 +1,10 @@
-import { SortSimulator, MeasureExecutionTime } from "./SortSimulator.ts";
+import { MeasureExecutionTime, SortSimulator } from "./SortSimulator.ts";
+
+type descriptionType = {
+  content: string;
+  leftNumber: number;
+  rightNumber: number;
+};
 
 export class BubbleSortSimulator extends SortSimulator {
   protected _sortType;
@@ -18,6 +24,8 @@ export class BubbleSortSimulator extends SortSimulator {
 
     let swap = false;
     let counter = 0;
+
+    this._operations.push({ startState: true, endState: false });
 
     for (let i = 0; i < size - 1; i++) {
       let j = 0;
@@ -41,16 +49,17 @@ export class BubbleSortSimulator extends SortSimulator {
 
       counter = counter + j;
 
-      this._operations[counter] = {
-        ...this._operations[counter],
-        indexSortedElement: size - i - 1,
-      };
+      // this._operations[counter] = {
+      //   ...this._operations[counter],
+      //   indexSortedElement: size - i - 1,
+      // };
     }
-    this._operations[this._operations.length] = {
+    this._operations[this.numberOfLastStep] = {
       ...this._operations[this._operations.length],
       indexSortedElement: 0,
     };
 
+    this._operations.push({ startState: false, endState: true });
     this.setSortedArray(arr);
     console.log("czy posortowane poprawnie: ", this.checkIsSorted());
   }
@@ -73,27 +82,67 @@ export class BubbleSortSimulator extends SortSimulator {
     return arr;
   }
 
-  public generateCurrentStateDescription(stepNumber: number): string | "" {
-    if (stepNumber >= this.numberOfLastStep) return "";
+  public generateCurrentStateDescription(): descriptionType {
+    const step = this._currentStep;
 
-    const prevStateStepNumber = this._currentStep;
-    this.goToStep(stepNumber);
+    const currentOperation = this._operations[step];
+    const arr = this._currentArray;
 
-    let stepDescription = `W kroku numer ${stepNumber} \n${this._currentArray[this._operations[stepNumber]?.leftNumber]} została porównana z ${this._currentArray[this._operations[stepNumber]?.rightNumber]}`;
-
-    if (this._operations[stepNumber].swapped) {
-      stepDescription =
-        stepDescription +
-        ` ${this._currentArray[this._operations[stepNumber]?.leftNumber]} i okazała się większa oraz została zamieniona miejscami`;
-    } else {
-      stepDescription =
-        stepDescription +
-        ` ${this._currentArray[this._operations[stepNumber]?.leftNumber]} i okazała się mniejsza`;
+    if (step === this.numberOfLastStep) {
+      return {
+        content: "Dane zostały posortowane",
+        leftNumber: 0,
+        rightNumber: 0,
+      };
     }
 
-    this.goToStep(prevStateStepNumber);
+    if (step === 0) {
+      return {
+        content: "Dane zainicjowane i gotowe do sortowania",
+        leftNumber: 0,
+        rightNumber: 0,
+      };
+    }
 
-    return stepDescription;
+    if (!("leftNumber" in currentOperation)) {
+      return {
+        content: "Wystąpił błąd",
+        leftNumber: 0,
+        rightNumber: 0,
+      };
+    }
+
+    const compareText = `${arr[currentOperation.leftNumber]} zostala porównana z ${arr[currentOperation.rightNumber]}`;
+    let compareTextResult: string = "";
+
+    if (currentOperation.leftNumber == currentOperation.rightNumber) {
+      compareTextResult = `, ${arr[currentOperation.leftNumber]} okazała się równa przez co nie została zamieniona`;
+    } else if (currentOperation.leftNumber > currentOperation.rightNumber) {
+      compareTextResult = `, ${arr[currentOperation.leftNumber]} okazała się większa `;
+    } else {
+      compareTextResult = `, ${arr[currentOperation.leftNumber]} okazała się mniejsza `;
+    }
+
+    if (currentOperation.swapped) {
+      compareTextResult =
+        compareTextResult +
+        `oraz została zamieniona miejscem z ${arr[currentOperation.rightNumber]}`;
+    }
+
+    let isElementSortedText: string = "";
+
+    if (currentOperation.indexSortedElement) {
+      isElementSortedText = `${arr[currentOperation.indexSortedElement]} został poprawnie posortowany`;
+    }
+
+    const stepDescription =
+      compareText + compareTextResult + isElementSortedText;
+
+    return {
+      content: stepDescription,
+      leftNumber: arr[currentOperation.leftNumber],
+      rightNumber: arr[currentOperation.leftNumber],
+    };
   }
 
   public generateJsonFile(): string {

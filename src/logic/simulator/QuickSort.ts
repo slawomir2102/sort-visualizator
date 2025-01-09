@@ -1,4 +1,9 @@
-import { MeasureExecutionTime, SortSimulator } from "./SortSimulator.ts";
+import {
+  descriptionType,
+  MeasureExecutionTime,
+  SortSimulator,
+} from "./SortSimulator.ts";
+import { sortDirectionType } from "../../pages/visualizator/Visualizator.tsx";
 
 export class QuickSortSimulator extends SortSimulator {
   protected _sortType;
@@ -8,12 +13,12 @@ export class QuickSortSimulator extends SortSimulator {
     this._sortType = "Quick Sort";
   }
 
-  private async partition(
+  private partition(
     arr: number[],
     low: number,
     high: number,
     ascending?: boolean,
-  ): Promise<number> {
+  ): number {
     const pivotIndex = high; // Wybór pivota
     const pivot = arr[pivotIndex]; // Pivot to element na końcu (po zamianie)
     let idx = low; // Initialize the index to start from the first element
@@ -67,12 +72,12 @@ export class QuickSortSimulator extends SortSimulator {
     return value;
   }
 
-  private async quickSortRecursive(
+  private quickSortRecursive(
     arr: number[],
     low: number,
     high: number,
     ascending?: boolean,
-  ): Promise<void> {
+  ): void {
     if (low >= high) {
       this._operations.push({
         leftNumber: low,
@@ -87,7 +92,7 @@ export class QuickSortSimulator extends SortSimulator {
       return;
     }
 
-    const pivotIndex = await this.partition(arr, low, high, ascending); // Partition the array
+    const pivotIndex = this.partition(arr, low, high, ascending); // Partition the array
 
     this.quickSortRecursive(arr, low, pivotIndex - 1, ascending); // Left subarray
     this.quickSortRecursive(arr, pivotIndex + 1, high, ascending); // Right subarray
@@ -216,8 +221,11 @@ export class QuickSortSimulator extends SortSimulator {
     return JSON.stringify(steps, null, 2);
   }
 
-  public generateCurrentStateDescription(stepNumber: number): string {
-    if (stepNumber < this.numberOfLastStep) return "";
-    return "";
+  public generateCurrentStateDescription(): descriptionType {
+    return {
+      content: "",
+      leftNumber: 0,
+      rightNumber: 0,
+    };
   }
 }

@@ -106,6 +106,9 @@ export default function Simulator({
     setDataToSort(sortSimulator.currentState);
     setCurrentStep(sortSimulator.currentStep);
 
+    const desc = sortSimulator.generateCurrentStateDescription().content;
+    setStepDescription(desc);
+
     highlightCurrentOperation();
   }, []);
 
@@ -127,9 +130,8 @@ export default function Simulator({
       setCurrentStep(simulator.currentStep);
       highlightCurrentOperation();
 
-      setStepDescription(
-        simulator.generateCurrentStateDescription(simulator.currentStep),
-      );
+      const desc: string = simulator.generateCurrentStateDescription().content;
+      setStepDescription(desc);
 
       setDataToSort(simulator.currentState);
       simulateDirection = NOTHING;
@@ -143,9 +145,8 @@ export default function Simulator({
       setCurrentStep(simulator.currentStep);
 
       highlightCurrentOperation();
-      setStepDescription(
-        simulator.generateCurrentStateDescription(simulator.currentStep),
-      );
+      const desc: string = simulator.generateCurrentStateDescription().content;
+      setStepDescription(desc);
 
       setDataToSort(simulator.currentState);
       simulateDirection = NOTHING;
@@ -222,7 +223,7 @@ export default function Simulator({
 
       if (simulateDirection == FORWARDING) {
         setSortedIndexes((prev: number[]): number[] => {
-          return prev.includes(currentOperation.indexSortedElement as number)
+          return prev.includes(currentOperation.indexSortedElement)
             ? prev
             : [...prev, Number(currentOperation.indexSortedElement)];
         });
@@ -370,8 +371,10 @@ export default function Simulator({
             );
           })}
         </div>
-        <div>
-          <Textarea label="Opis" disabled={true} value={stepDescription} />
+        <div
+          className={"h-10 bg-background-50 rounded-xl p-10 flex items-center"}
+        >
+          {stepDescription}
         </div>
         <div className={"flex flex-row justify-between"}>
           <Card>
@@ -432,12 +435,20 @@ export default function Simulator({
                 {/*]*/}
               </p>
               <Input
+                type={"number"}
+                min={0}
+                max={sortSimulatorRef.current?.numberOfLastStep}
+                errorMessage={" "}
                 onChange={(e) => setStepToGo(Number(e.target.value))}
-                className={"max-w-16"}
+                className={"max-w-16 max-h-12  relative"}
               />
               <Button
                 color={"primary"}
-                isDisabled={isRunning}
+                isDisabled={
+                  isRunning ||
+                  (stepToGo >= sortSimulatorRef.current?.numberOfLastStep &&
+                    stepToGo > 0)
+                }
                 onPress={() => handleGoToStepWithAnimation(stepToGo)}
               >
                 Skocz

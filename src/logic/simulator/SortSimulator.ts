@@ -17,6 +17,16 @@ export type SortOperation = {
     rightIndex: number;
   };
 };
+export type SortState = {
+  startState: boolean;
+  endState: boolean;
+};
+
+export type descriptionType = {
+  content: string;
+  leftNumber: number;
+  rightNumber: number;
+};
 
 export abstract class SortSimulator {
   // ---------- KONSTRUKTOR KLASY ------------------------------------------------------------------
@@ -39,7 +49,7 @@ export abstract class SortSimulator {
   protected _originalArray: number[];
   protected _currentArray: number[];
   protected _sortedArray: number[];
-  protected _operations: SortOperation[];
+  protected _operations: (SortOperation | SortState)[];
   protected _numberOfTotalSteps: number;
   protected _currentStep: number;
   protected _isSorted: boolean;
@@ -96,14 +106,6 @@ export abstract class SortSimulator {
     return this._sortDirection;
   }
 
-  public getValueOfI() {
-    return this._currentArray[this._operations[this._currentStep].leftNumber];
-  }
-
-  public getValueOfJ() {
-    return this._currentArray[this._operations[this._currentStep].rightNumber];
-  }
-
   public getExecutionTimeFor(
     methodName: string,
     precision: number = 2,
@@ -146,7 +148,7 @@ export abstract class SortSimulator {
 
   public abstract sortWithoutSteps(ascending?: boolean): number[];
 
-  public abstract generateCurrentStateDescription(stepNumber: number): string;
+  public abstract generateCurrentStateDescription(): descriptionType;
 
   public abstract generateJsonFile(): string;
 
@@ -204,12 +206,14 @@ export abstract class SortSimulator {
 
   // następny krok symulacji
   public nextStep(): number[] {
-    if (this._currentStep >= this.numberOfLastStep) {
+    if (this._currentStep > this.numberOfLastStep - 1) {
       return this.currentState;
     }
 
-    const operation = this._operations[this._currentStep];
-    if (operation.swapped) {
+    const operation: SortOperation | SortState =
+      this._operations[this._currentStep];
+
+    if ("swapped" in operation && operation.swapped) {
       this.swap(
         this._currentArray,
         operation.leftNumber,
@@ -230,7 +234,7 @@ export abstract class SortSimulator {
     this._currentStep--;
 
     const operation = this._operations[this._currentStep];
-    if (operation.swapped) {
+    if ("swapped" in operation && operation.swapped) {
       this.swap(
         this._currentArray,
         operation.leftNumber,
