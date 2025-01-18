@@ -215,17 +215,25 @@ export default function Simulator({
 
       if (simulateDirection == REVERSING) {
         setSortedIndexes((prev) => {
-          return prev.filter(
-            (index) => index !== Number(currentOperation.indexSortedElement),
+          const updateArray = prev.filter(
+            (index) => index !== currentOperation.indexSortedElement,
           );
+
+          return (prev = updateArray);
         });
       }
 
       if (simulateDirection == FORWARDING) {
         setSortedIndexes((prev: number[]): number[] => {
-          return prev.includes(currentOperation.indexSortedElement)
-            ? prev
-            : [...prev, Number(currentOperation.indexSortedElement)];
+          if (
+            !sortedIndexes.includes(currentOperation.indexSortedElement) &&
+            currentOperation.indexSortedElement !== undefined
+          ) {
+            const updateArray = currentOperation.indexSortedElement;
+            return [...prev, updateArray];
+          }
+
+          return [...prev];
         });
       }
     });
@@ -350,11 +358,11 @@ export default function Simulator({
                 
                
                
-                ${isActiveI ? "!bg-blue-300" : ""}
+                ${isActiveI || (isActiveI && isSorted) ? "!bg-blue-300" : ""}
                 ${(isActiveI && isRangeDown) || isRangeDown ? "border-l-4 border-purple-500" : ""}
                 ${isActiveI && isRangeDown && isRangeUp ? "border-l-4 border-r-4 border-purple-500" : ""}
                 
-                ${isActiveJ ? "!bg-green-300" : ""}
+                ${isActiveJ || (isActiveJ && isSorted) ? "!bg-green-300" : ""}
                 ${(isActiveJ && isRangeUp) || isRangeUp ? "border-r-4 border-purple-500" : ""}
                 
                 

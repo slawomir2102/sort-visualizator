@@ -22,9 +22,6 @@ export class BubbleSortSimulator extends SortSimulator {
     const arr = [...this._originalArray];
     const size = arr.length;
 
-    let swap = false;
-    let counter = 0;
-
     this._operations.push({ startState: true, endState: false });
 
     for (let i = 0; i < size - 1; i++) {
@@ -34,30 +31,21 @@ export class BubbleSortSimulator extends SortSimulator {
           (!ascending && arr[j] > arr[j + 1]) ||
           (ascending && arr[j] < arr[j + 1])
         ) {
+          this.registerSwapOperation(j, j + 1, true);
           this.swapS(arr, j, j + 1);
-          swap = true;
         }
-
-        this.registerSwapOperation(
-          j,
-          j + 1,
-          swap,
-          // j == size - i - 1 - 1 ? (j == 0 ? j : j + 1) : undefined,
-        );
-        swap = false;
+        this.registerSwapOperation(j, j + 1, false);
       }
 
-      counter = counter + j;
-
-      // this._operations[counter] = {
-      //   ...this._operations[counter],
-      //   indexSortedElement: size - i - 1,
-      // };
+      this._operations[this.numberOfLastStep] = {
+        ...this._operations[this.numberOfLastStep],
+        indexSortedElement: size - i - 1,
+      };
     }
-    this._operations[this.numberOfLastStep] = {
-      ...this._operations[this._operations.length],
-      indexSortedElement: 0,
-    };
+    // this._operations[this.numberOfLastStep] = {
+    //   ...this._operations[this.numberOfLastStep],
+    //   indexSortedElement: 0,
+    // };
 
     this._operations.push({ startState: false, endState: true });
     this.setSortedArray(arr);

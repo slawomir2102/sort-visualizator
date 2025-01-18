@@ -21,11 +21,12 @@ import {
 
 import React, { useEffect, useState } from "react";
 
-import Simulator from "../../logic/Simulator";
+import Simulator from "../../logic/Simulator.tsx";
 
 import { Generator } from "../../logic/simulator/Generator.ts";
 import { MdInfo } from "react-icons/md";
 import PopoverWrapper from "../../components/popover_wrapper/PopoverWrapper.tsx";
+import BlurOverlay from "../../components/blur_overlay/BlurOverlay.tsx";
 
 export type sortDirectionType = "ASCENDING" | "DESCENDING";
 
@@ -166,16 +167,19 @@ const Visualizator = () => {
     setManualDataInputValues(arr);
   }
 
+  const [isBlurActive, setIsBlurActive] = useState(false);
+
   return (
     <div className={"flex w-full h-full flex-row justify-center gap-xl p-4"}>
+      <BlurOverlay
+        isVisible={isBlurActive}
+        setIsBlurActive={() => {
+          setIsBlurActive(false);
+        }}
+      />
+
       <Card className={"w-1/4 relative"}>
-        <Button
-          color={"primary"}
-          className={" absolute top-5 right-5 z-20"}
-          onPress={() => {
-            setTrigger(!trigger);
-          }}
-        >
+        <Button color={"primary"} className={" absolute top-5 right-5 z-20"}>
           <MdInfo color={"white"} size={20} />
         </Button>
 
@@ -192,10 +196,7 @@ const Visualizator = () => {
 
                 <PopoverWrapper
                   content={"siema"}
-                  trigger={trigger}
-                  onTrigger={() => {
-                    setTrigger(false);
-                  }}
+                  setIsBlurActive={setIsBlurActive}
                 >
                   <Select
                     label="Select Sorting Algorithm"
@@ -219,10 +220,7 @@ const Visualizator = () => {
 
                 <PopoverWrapper
                   content={"siema"}
-                  trigger={trigger}
-                  onTrigger={() => {
-                    setTrigger(false);
-                  }}
+                  setIsBlurActive={setIsBlurActive}
                 >
                   <div className={"flex flex-row-reverse items-center gap-xl"}>
                     <Switch
@@ -248,7 +246,13 @@ const Visualizator = () => {
               <p>Dane do sortowania:</p>
 
               <div className={"flex flex-row items-center justify-end gap-lg"}>
-                <Button onPress={onOpen}>Uzupełnij dane</Button>
+                <PopoverWrapper
+                  content={"siema"}
+                  trigger={trigger}
+                  setIsBlurActive={setIsBlurActive}
+                >
+                  <Button onPress={onOpen}>Uzupełnij dane</Button>
+                </PopoverWrapper>
               </div>
 
               <Modal isOpen={isOpen} onOpenChange={onOpenChange}>

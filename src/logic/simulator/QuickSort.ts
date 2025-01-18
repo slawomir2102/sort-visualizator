@@ -157,6 +157,7 @@ export class QuickSortSimulator extends SortSimulator {
     }
   }
 
+  @MeasureExecutionTime
   public sortWithoutSteps(ascending?: boolean): number[] {
     // This method can be implemented for quicksort without recording steps
     const arr = [...this._originalArray];

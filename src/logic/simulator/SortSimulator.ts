@@ -2,7 +2,7 @@ type operation = "swap" | "partition" | "pivot-swap" | "compare";
 export type SortOperation = {
   leftNumber: number;
   rightNumber: number;
-  indexSortedElement?: number;
+  indexSortedElement: number;
   typeOperation?: operation;
   swapped?: boolean;
   rangeDown?: number;
