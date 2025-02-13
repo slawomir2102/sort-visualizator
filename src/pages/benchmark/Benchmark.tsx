@@ -67,8 +67,8 @@ const Benchmark = () => {
   };
 
   return (
-    <div className={"flex flex-row justify-around  gap-lg p-4 w-full"}>
-      <Card className={"bg-background-100 w-1/4"}>
+    <div className={"flex flex-row justify-between  gap-lg p-4 w-full"}>
+      <Card className={" w-1/4"}>
         <CardHeader>
           <h2 className={"w-full text-center"}>Generator danych</h2>
         </CardHeader>
@@ -140,8 +140,8 @@ const Benchmark = () => {
           </div>
         </CardBody>
       </Card>
-      <div className={"flex flex-col gap-lg w-2/3"}>
-        <Card className={"bg-background-100"}>
+      <div className={"flex flex-col gap-lg w-3/4"}>
+        <Card >
           <CardHeader>
             <h2 className={"text-center w-full"}>Symulatory wydajności</h2>
           </CardHeader>
@@ -159,7 +159,7 @@ const Benchmark = () => {
           </CardBody>
         </Card>
 
-        <Card className={"bg-background-100"}>
+        <Card >
           <CardHeader>
             <h2 className={"text-center w-full"}>Sterowanie symulacją</h2>
           </CardHeader>

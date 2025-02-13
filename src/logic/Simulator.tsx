@@ -12,7 +12,6 @@ import {
   ModalHeader,
   Select,
   SelectItem,
-  Textarea,
   useDisclosure,
 } from "@nextui-org/react";
 import ChartBox from "../components/chart_box/ChartBox";
@@ -41,6 +40,9 @@ export default function Simulator({
   selectedAlgorithm: string;
   deliveredSortDirection: sortDirectionType;
 }) {
+  const [simulator, setSimulator] = useState<SortSimulator | null>(null);
+  const sortSimulatorRef = useRef<SortSimulator>();
+
   const [dataToSort, setDataToSort] = useState<number[]>([]);
   const [currentStep, setCurrentStep] = useState<number | null>();
   const [stepToGo, setStepToGo] = useState<number>(0);
@@ -62,7 +64,7 @@ export default function Simulator({
   const [animationSpeed, setAnimationSpeed] = useState<number>(0);
   const forceToStopAnimationRef = useRef<boolean>(false);
 
-  const sortSimulatorRef = useRef<SortSimulator>();
+
 
   const iconSize: number = 20;
 
@@ -73,10 +75,9 @@ export default function Simulator({
   let simulateDirection: number = NOTHING;
 
   useEffect(() => {
-    if (!deliveredDataToSort || deliveredDataToSort.length === 0) return;
-    if (!selectedAlgorithm) return;
+    if (!deliveredDataToSort || deliveredDataToSort.length === 0 || !selectedAlgorithm) return;
 
-    let sortSimulator;
+    let sortSimulator: SortSimulator | null;
 
     switch (selectedAlgorithm) {
       case "bubbleSort":
@@ -93,15 +94,18 @@ export default function Simulator({
     sortSimulator.setData(deliveredDataToSort);
 
     let sortDirection: boolean;
+
     if (deliveredSortDirection === "ASCENDING") {
       sortDirection = SortSimulator.ASCENDING;
-    } else {
+    }
+    else {
       sortDirection = SortSimulator.DESCENDING;
     }
-    console.log(sortDirection);
+
     sortSimulator.generateSteps(sortDirection);
 
     sortSimulatorRef.current = sortSimulator;
+    setSimulator(sortSimulatorRef.current);
 
     setDataToSort(sortSimulator.currentState);
     setCurrentStep(sortSimulator.currentStep);
@@ -126,14 +130,15 @@ export default function Simulator({
   const handlePrevStep = () => {
     getSimulator((simulator) => {
       simulateDirection = REVERSING;
+
       simulator.prevStep();
       setCurrentStep(simulator.currentStep);
+      setDataToSort(simulator.currentState);
       highlightCurrentOperation();
 
       const desc: string = simulator.generateCurrentStateDescription().content;
       setStepDescription(desc);
 
-      setDataToSort(simulator.currentState);
       simulateDirection = NOTHING;
     });
   };
@@ -141,14 +146,15 @@ export default function Simulator({
   const handleNextStep = () => {
     getSimulator((simulator) => {
       simulateDirection = FORWARDING;
+
       simulator.nextStep();
       setCurrentStep(simulator.currentStep);
-
+      setDataToSort(simulator.currentState);
       highlightCurrentOperation();
+
       const desc: string = simulator.generateCurrentStateDescription().content;
       setStepDescription(desc);
 
-      setDataToSort(simulator.currentState);
       simulateDirection = NOTHING;
     });
   };
@@ -243,6 +249,7 @@ export default function Simulator({
     if (!sortSimulatorRef.current) return;
 
     const jsonString = sortSimulatorRef.current.generateJsonFile();
+    if (!jsonString) return;
     const blob = new Blob([jsonString], { type: "application/json" });
 
     const link = document.createElement("a");
@@ -293,7 +300,7 @@ export default function Simulator({
   ];
 
   return (
-    <div className={"w-3/4"}>
+    <div className={'w-full p-4'}>
       <div className={"flex flex-col gap-xl  justify-center "}>
         {" "}
         <Modal size={"2xl"} isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -454,7 +461,7 @@ export default function Simulator({
                 color={"primary"}
                 isDisabled={
                   isRunning ||
-                  (stepToGo >= sortSimulatorRef.current?.numberOfLastStep &&
+                  (sortSimulatorRef.current && stepToGo >= sortSimulatorRef.current.numberOfLastStep &&
                     stepToGo > 0)
                 }
                 onPress={() => handleGoToStepWithAnimation(stepToGo)}

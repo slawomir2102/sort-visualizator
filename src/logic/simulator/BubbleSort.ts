@@ -33,8 +33,10 @@ export class BubbleSortSimulator extends SortSimulator {
         ) {
           this.registerSwapOperation(j, j + 1, true);
           this.swapS(arr, j, j + 1);
+        } else {
+          this.registerSwapOperation(j, j + 1, false);
         }
-        this.registerSwapOperation(j, j + 1, false);
+
       }
 
       this._operations[this.numberOfLastStep] = {
@@ -133,7 +135,7 @@ export class BubbleSortSimulator extends SortSimulator {
     };
   }
 
-  public generateJsonFile(): string {
+  public generateJsonFile(): string | null{
     if (!this._operations || this._operations.length === 0) {
       console.error("Tablica _operations jest pusta.");
       return JSON.stringify(
@@ -143,9 +145,18 @@ export class BubbleSortSimulator extends SortSimulator {
       );
     }
 
+
+
     const steps: object[] = [];
     const prevStateCurrentStep = this._currentStep;
     this.goToStep(0);
+
+    const currentOperation = this._operations[this._currentStep];
+    const currentState = this.currentState;
+
+    if (!("leftNumber" in currentOperation)) {
+      return null;
+    }
 
     steps.push({
       sortType: this._sortType,
@@ -161,25 +172,25 @@ export class BubbleSortSimulator extends SortSimulator {
         stepNumber: i,
         stepContent: {
           leftNumber: {
-            index: this._operations[i]?.leftNumber,
-            value: this._currentArray[this._operations[i]?.leftNumber],
+            index: currentOperation.leftNumber,
+            value: currentState[currentOperation.leftNumber],
           },
           rightNumber: {
-            index: this._operations[i]?.rightNumber,
-            value: this._currentArray[this._operations[i]?.rightNumber],
+            index: currentOperation.rightNumber,
+            value: currentState[currentOperation.rightNumber],
           },
           typeOperation: {
-            name: this._operations[i]?.typeOperation || "unknown",
-            isDone: this._operations[i]?.swapped,
+            name: currentOperation.typeOperation,
+            isDone: currentOperation.swapped,
           },
           sortedElement: {
-            index: this._operations[i]?.indexSortedElement,
-            //value: this._currentArray[this._operations[i].indexSortedElement],
+            index: currentOperation.indexSortedElement,
+            value: currentState[currentOperation.indexSortedElement],
           },
           comunnicate: {
-            text: this.generateCurrentStateDescription(i),
+            text: this.generateCurrentStateDescription().content,
           },
-          currentArray: this.currentState.toString(),
+          currentArray: currentState.toString(),
         },
       });
 

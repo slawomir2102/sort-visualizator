@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 
 type BlurOverlayProps = {
   isVisible: boolean;
@@ -9,9 +9,14 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({
   isVisible,
   setIsBlurActive,
 }) => {
+
+    useEffect(() => {
+        console.log("isVisible",isVisible)
+    }, [isVisible]);
+
   return isVisible ? (
     <div
-      onClick={setIsBlurActive}
+      onClick={() => {setIsBlurActive(!isVisible)}}
       style={{
         position: "fixed",
         top: 0,

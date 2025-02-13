@@ -6,10 +6,9 @@ const Navigation = () => {
   return (
     <div className={"p-4 w-full"}>
       <Card>
-        <Navbar className={"bg-content1"}>
+        <Navbar className={"bg-content1 flex flex-row items-center justify-between"}>
           <NavbarContent
-            className="flex flex-row items-center justify-between gap-xl"
-            justify="center"
+            className="flex flex-row items-center justify-between gap-xl "
           >
             <NavigationLink destination={"/home"} title={"home"} />
             <NavigationLink
@@ -18,7 +17,8 @@ const Navigation = () => {
             />
             <NavigationLink destination={"/benchmark"} title={"benchmark"} />
           </NavbarContent>
-          <NavbarContent justify="end">
+          <NavbarContent className={'flex flex-row items-center gap-lg'}>
+            <p>Motyw</p>
             <ThemeSwitcher />
           </NavbarContent>
         </Navbar>

@@ -150,7 +150,7 @@ export abstract class SortSimulator {
 
   public abstract generateCurrentStateDescription(): descriptionType;
 
-  public abstract generateJsonFile(): string;
+  public abstract generateJsonFile(): string | null;
 
   // --------------- METODY WSPOLNE ----------------------------------------------------------------
 
