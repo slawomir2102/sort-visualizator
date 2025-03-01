@@ -28,10 +28,11 @@ import {
 } from "react-icons/md";
 import { IoMdArrowRoundBack, IoMdArrowRoundForward } from "react-icons/io";
 import { sortDirectionType } from "../pages/visualizator/Visualizator.tsx";
+import { InsertionSortSimulator } from "./simulator/InsertionSort.ts";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export default function Simulator({
+export function Simulator({
   deliveredDataToSort,
   selectedAlgorithm,
   deliveredSortDirection,
@@ -64,8 +65,6 @@ export default function Simulator({
   const [animationSpeed, setAnimationSpeed] = useState<number>(0);
   const forceToStopAnimationRef = useRef<boolean>(false);
 
-
-
   const iconSize: number = 20;
 
   const REVERSING = 1;
@@ -75,7 +74,12 @@ export default function Simulator({
   let simulateDirection: number = NOTHING;
 
   useEffect(() => {
-    if (!deliveredDataToSort || deliveredDataToSort.length === 0 || !selectedAlgorithm) return;
+    if (
+      !deliveredDataToSort ||
+      deliveredDataToSort.length === 0 ||
+      !selectedAlgorithm
+    )
+      return;
 
     let sortSimulator: SortSimulator | null;
 
@@ -85,6 +89,9 @@ export default function Simulator({
         break;
       case "quickSort":
         sortSimulator = new QuickSortSimulator();
+        break;
+      case "insertionSort":
+        sortSimulator = new InsertionSortSimulator();
         break;
       default:
         sortSimulator = new BubbleSortSimulator();
@@ -97,8 +104,7 @@ export default function Simulator({
 
     if (deliveredSortDirection === "ASCENDING") {
       sortDirection = SortSimulator.ASCENDING;
-    }
-    else {
+    } else {
       sortDirection = SortSimulator.DESCENDING;
     }
 
@@ -300,7 +306,7 @@ export default function Simulator({
   ];
 
   return (
-    <div className={'w-full p-4'}>
+    <div className={"w-full p-4"}>
       <div className={"flex flex-col gap-xl  justify-center "}>
         {" "}
         <Modal size={"2xl"} isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -461,7 +467,8 @@ export default function Simulator({
                 color={"primary"}
                 isDisabled={
                   isRunning ||
-                  (sortSimulatorRef.current && stepToGo >= sortSimulatorRef.current.numberOfLastStep &&
+                  (sortSimulatorRef.current &&
+                    stepToGo >= sortSimulatorRef.current.numberOfLastStep &&
                     stepToGo > 0)
                 }
                 onPress={() => handleGoToStepWithAnimation(stepToGo)}

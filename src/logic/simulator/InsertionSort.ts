@@ -6,12 +6,12 @@ type descriptionType = {
   rightNumber: number;
 };
 
-export class BubbleSortSimulator extends SortSimulator {
+export class InsertionSortSimulator extends SortSimulator {
   protected _sortType;
 
   constructor() {
     super();
-    this._sortType = "Bubble Sort";
+    this._sortType = "Insertion Sort";
   }
 
   @MeasureExecutionTime
@@ -24,25 +24,36 @@ export class BubbleSortSimulator extends SortSimulator {
 
     this._operations.push({ startState: true, endState: false });
 
-    for (let i = 0; i < size - 1; i++) {
-      let j = 0;
-      for (j; j < size - i - 1; j++) {
-        if (
-          (!ascending && arr[j] > arr[j + 1]) ||
-          (ascending && arr[j] < arr[j + 1])
-        ) {
-          this.registerSwapOperation(j, j + 1, true);
-          this.swapS(arr, j, j + 1);
-        } else {
-          this.registerSwapOperation(j, j + 1, false);
-        }
-      }
+    for (let i = 1; i < size; i++) {
+      let key = arr[i];
+      let j = i;
 
-      this._operations[this.numberOfLastStep] = {
-        ...this._operations[this.numberOfLastStep],
-        indexSortedElement: size - i - 1,
-      };
+      this._operations.push({
+        leftNumber: key,
+        rightNumber: j - 1,
+        typeOperation: "comparison",
+      });
+
+      for (j; j > 0 && arr[j - 1] > key; j--) {
+        this._operations.push({
+          leftNumber: j - 1,
+          rightNumber: j,
+          typeOperation: "swap",
+          swapped: true,
+        });
+        arr[j] = arr[j - 1]; // Uncomment to update array state
+      }
+      arr[j] = key; // Uncomment to update array state
+
+      this._operations.push({
+        leftNumber: key,
+        rightNumber: j,
+        indexSortedElement: i - 1,
+        typeOperation: "insert",
+      });
     }
+
+    console.log(this._operations);
 
     this._operations.push({ startState: false, endState: true });
     this.setSortedArray(arr);
@@ -53,15 +64,14 @@ export class BubbleSortSimulator extends SortSimulator {
     const arr = [...this._originalArray];
     const size = arr.length;
 
-    for (let i = 0; i < size - 1; i++) {
-      for (let j = 0; j < size - i - 1; j++) {
-        if (
-          (!ascending && arr[j] > arr[j + 1]) ||
-          (ascending && arr[j] < arr[j + 1])
-        ) {
-          this.swap(arr, j, j + 1);
-        }
+    for (let i = 1; i < size; i++) {
+      let key = arr[i];
+      let j = i;
+
+      for (; j > 0 && arr[j - 1] > key; j--) {
+        arr[j] = arr[j - 1];
       }
+      arr[j] = key;
     }
     return arr;
   }
@@ -129,7 +139,7 @@ export class BubbleSortSimulator extends SortSimulator {
     };
   }
 
-  public generateJsonFile(): string | null {
+  public generateJsonFile(): string {
     if (!this._operations || this._operations.length === 0) {
       console.error("Tablica _operations jest pusta.");
       return JSON.stringify(
@@ -142,13 +152,6 @@ export class BubbleSortSimulator extends SortSimulator {
     const steps: object[] = [];
     const prevStateCurrentStep = this._currentStep;
     this.goToStep(0);
-
-    const currentOperation = this._operations[this._currentStep];
-    const currentState = this.currentState;
-
-    if (!("leftNumber" in currentOperation)) {
-      return null;
-    }
 
     steps.push({
       sortType: this._sortType,
@@ -164,25 +167,25 @@ export class BubbleSortSimulator extends SortSimulator {
         stepNumber: i,
         stepContent: {
           leftNumber: {
-            index: currentOperation.leftNumber,
-            value: currentState[currentOperation.leftNumber],
+            index: this._operations[i]?.leftNumber,
+            value: this._currentArray[this._operations[i]?.leftNumber],
           },
           rightNumber: {
-            index: currentOperation.rightNumber,
-            value: currentState[currentOperation.rightNumber],
+            index: this._operations[i]?.rightNumber,
+            value: this._currentArray[this._operations[i]?.rightNumber],
           },
           typeOperation: {
-            name: currentOperation.typeOperation,
-            isDone: currentOperation.swapped,
+            name: this._operations[i]?.typeOperation || "unknown",
+            isDone: this._operations[i]?.swapped,
           },
           sortedElement: {
-            index: currentOperation.indexSortedElement,
-            value: currentState[currentOperation.indexSortedElement],
+            index: this._operations[i]?.indexSortedElement,
+            //value: this._currentArray[this._operations[i].indexSortedElement],
           },
           comunnicate: {
-            text: this.generateCurrentStateDescription().content,
+            text: this.generateCurrentStateDescription(i),
           },
-          currentArray: currentState.toString(),
+          currentArray: this.currentState.toString(),
         },
       });
 

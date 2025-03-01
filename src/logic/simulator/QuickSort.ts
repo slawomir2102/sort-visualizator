@@ -121,6 +121,7 @@ export class QuickSortSimulator extends SortSimulator {
     console.log("czy posortowane poprawnie: ", this.checkIsSorted());
   }
 
+  @MeasureExecutionTime
   private partitionWithoutSteps(
     arr: number[],
     low: number,

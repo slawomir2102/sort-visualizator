@@ -18,7 +18,7 @@ import {
 
 import React, { useEffect, useState } from "react";
 
-import Simulator from "../../logic/Simulator.tsx";
+import { NewSimulator } from "../../logic/newSimulator.tsx";
 
 import { Generator } from "../../logic/simulator/Generator.ts";
 import { MdInfo } from "react-icons/md";
@@ -31,6 +31,7 @@ const Visualizator = () => {
   const simulators = [
     { key: "bubbleSort", label: "Bubble Sort" },
     { key: "quickSort", label: "Quick Sort" },
+    { key: "insertionSort", label: "Insertion Sort" },
   ];
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -166,13 +167,16 @@ const Visualizator = () => {
 
   return (
     <div className={"flex w-full h-full flex-row justify-center gap-xl p-4"}>
-      <BlurOverlay
-        isVisible={isBlurActive}
-        setIsBlurActive={setIsBlurActive}
-      />
+      <BlurOverlay isVisible={isBlurActive} setIsBlurActive={setIsBlurActive} />
 
       <Card className={"w-1/4 relative"}>
-        <Button onPress={() => {setIsBlurActive((prev) => !prev)}} color={"primary"} className={" absolute top-5 right-5 z-20"}>
+        <Button
+          onPress={() => {
+            setIsBlurActive((prev) => !prev);
+          }}
+          color={"primary"}
+          className={" absolute top-5 right-5 z-20"}
+        >
           <MdInfo color={"white"} size={20} />
         </Button>
 
@@ -188,11 +192,12 @@ const Visualizator = () => {
                 <p>Algorytm sortujący:</p>
 
                 <PopoverWrapper
-                  content={"Lista dostępnych algorytmów, jeżeli chcesz uruchomić symulacje musisz wybrać jeden z wyklistowanych"}
+                  content={
+                    "Lista dostępnych algorytmów, jeżeli chcesz uruchomić symulacje musisz wybrać jeden z wyklistowanych"
+                  }
                   isVisible={isBlurActive}
                 >
                   <Select
-
                     placeholder="Wybierz algorytm"
                     selectedKeys={[sortType]}
                     onChange={handleSelectionChange}
@@ -211,10 +216,7 @@ const Visualizator = () => {
               >
                 <p>Kierunek sortowania: </p>
 
-                <PopoverWrapper
-                  content={"siema"}
-                  isVisible={isBlurActive}
-                >
+                <PopoverWrapper content={"siema"} isVisible={isBlurActive}>
                   <div className={"flex flex-row-reverse items-center gap-xl"}>
                     <Switch
                       defaultSelected
@@ -239,10 +241,7 @@ const Visualizator = () => {
               <p>Dane do sortowania:</p>
 
               <div className={"flex flex-row items-center justify-end gap-lg"}>
-                <PopoverWrapper
-                  content={"siema"}
-                  isVisible={isBlurActive}
-                >
+                <PopoverWrapper content={"siema"} isVisible={isBlurActive}>
                   <Button onPress={onOpen}>Uzupełnij dane</Button>
                 </PopoverWrapper>
               </div>
@@ -371,7 +370,6 @@ const Visualizator = () => {
             </div>
 
             <Button
-
               isDisabled={!isChoosedSortAlgoritm || !isArrayNotEmpty}
               onPress={handleSimulationClick}
             >
@@ -391,7 +389,7 @@ const Visualizator = () => {
 
             {isLoading && <Spinner size={"lg"} />}
             {simulate && !isLoading && (
-              <Simulator
+              <NewSimulator
                 deliveredDataToSort={dataToSort}
                 selectedAlgorithm={sortType}
                 deliveredSortDirection={sortDirection}

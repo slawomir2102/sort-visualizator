@@ -5,12 +5,15 @@ import { NextUIProvider } from "@nextui-org/system";
 import { ThemeProvider } from "next-themes";
 
 import "./style.css";
+import { SimulatorProvider } from "./logic/simulator_new/SimulatorContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <NextUIProvider>
       <ThemeProvider attribute="class" defaultTheme="light">
-        <App />
+        <SimulatorProvider>
+          <App />
+        </SimulatorProvider>
       </ThemeProvider>
     </NextUIProvider>
   </BrowserRouter>,
