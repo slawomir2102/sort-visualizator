@@ -5,7 +5,7 @@ import { NextUIProvider } from "@nextui-org/system";
 import { ThemeProvider } from "next-themes";
 
 import "./style.css";
-import { SimulatorProvider } from "./logic/simulator_new/SimulatorContext.tsx";
+import { SimulatorProvider } from "./logic/simulator/SImulatorProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>

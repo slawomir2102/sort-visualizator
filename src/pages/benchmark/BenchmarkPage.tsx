@@ -10,15 +10,8 @@ import {
 } from "@nextui-org/react";
 import { useCallback, useState } from "react";
 import Benchmark, { typeOperation } from "./Benchmark.tsx";
-import { Generator } from "../../logic/simulator_new/Generator.ts";
-
-export const setsNumberOfElements = [
-  { key: 10000, label: "10000" },
-  { key: 20000, label: "20000" },
-  { key: 50000, label: "50000" },
-  { key: 100000, label: "100000" },
-  { key: 200000, label: "200000" },
-];
+import { Generator } from "../../logic/simulator/Generator.ts";
+import {setsNumberOfElements} from "../../logic/simulator/SimulatorTypes.ts";
 
 const BenchmarkPage = () => {
   const [trigger, setTrigger] = useState<boolean>(false);

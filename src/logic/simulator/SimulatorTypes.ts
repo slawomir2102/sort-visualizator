@@ -1,3 +1,8 @@
+import {BubbleSort} from "./bubble_sort/BubbleSort.ts";
+import {QuickSort} from "./quick_sort/QuickSort.ts";
+import {InsertionSort} from "./insertion_sort/InsertionSort.ts";
+import {SelectionSort} from "./selection_sort/SelectionSort.ts";
+
 export enum SimulatorState {
   Initial = 0,
   DuringSorting = 1,
@@ -9,16 +14,14 @@ export type SimulatorStateType =
   | SimulatorState.DuringSorting
   | SimulatorState.Sorted;
 
-export enum SortDirection {
-  ASCENDING = 0,
-  DESCENDING = 1,
-}
+
 
 export enum SimDirection {
   Forward = 0,
   Standby = 1,
   Reverse = 2,
 }
+
 export type SimDirectionType =
   | SimDirection.Forward
   | SimDirection.Reverse
@@ -46,6 +49,29 @@ export type SimAnimationSpeedType =
   | SimAnimationSpeed.Slow
   | SimAnimationSpeed.VerySlow;
 
+
+export enum SortDirection {
+  ASCENDING = 0,
+  DESCENDING = 1,
+}
+
 export type sortDirectionType =
-  | SortDirection.ASCENDING
+  SortDirection.ASCENDING
   | SortDirection.DESCENDING;
+
+export const simulators = [
+  { key: "bubbleSort", label: "Bubble Sort" },
+  { key: "quickSort", label: "Quick Sort" },
+  { key: "insertionSort", label: "Insertion Sort" },
+  { key: "selectionSort", label: "Selection Sort" },
+];
+
+export const setsNumberOfElements = [
+  { key: 10000, label: "10000" },
+  { key: 20000, label: "20000" },
+  { key: 50000, label: "50000" },
+  { key: 100000, label: "100000" },
+  { key: 200000, label: "200000" },
+];
+
+export type Simulators = BubbleSort | QuickSort | InsertionSort | SelectionSort | null;

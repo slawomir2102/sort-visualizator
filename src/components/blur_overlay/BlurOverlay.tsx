@@ -24,7 +24,7 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({
         width: "100vw",
         height: "100vh",
         background: "rgba(0, 0, 0, 0.5)",
-        backdropFilter: "blur(3px)",
+        backdropFilter: "blur(1px)",
         zIndex: 9998, // Ensure it sits below the popover
         cursor: "pointer",
       }}

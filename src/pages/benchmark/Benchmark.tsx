@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Generator } from "../../logic/simulator_new/Generator.ts";
+import { Generator } from "../../logic/simulator/Generator.ts";
 import { Select, SelectItem, Spinner } from "@nextui-org/react";
-import { setsNumberOfElements } from "./BenchmarkPage.tsx";
+import { setsNumberOfElements } from "../../logic/simulator/SimulatorTypes.ts";
+import {simulators} from "../../logic/simulator/SimulatorTypes.ts";
 
 export type typeOperation = "start" | "stop" | null;
 
@@ -14,20 +15,12 @@ interface Props {
 }
 
 const Benchmark = (props: Props) => {
-  const simulators = [
-    { key: "bubble", label: "Bubble Sort" },
-    { key: "insertion", label: "Insertion Sort" },
-    { key: "selection", label: "Selection Sort" },
-    { key: "quick", label: "Quick Sort" },
-  ];
-
   const [sortAlg, setSortAlg] = useState<string | null>(null);
   const [algLoading, setAlgLoading] = useState<boolean>(false);
   const [numberOfElements, setNumberOfElements] = useState<string | null>(null);
   const [firstResultData, setFirstResultData] = useState<number | null>(null);
   const [worker, setWorker] = useState<Worker | null>(null);
-
-  const [isDataDelivered, setIsDataDelivered] = useState<boolean>(false);
+  const [, setIsDataDelivered] = useState<boolean>(false);
 
   useEffect(() => {
     if (props.dataHaveToBeTheSame) {

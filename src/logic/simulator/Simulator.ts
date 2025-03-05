@@ -59,8 +59,6 @@ export abstract class Simulator {
     this.numberOfLastStep = 0;
     this.swapsCounter = 0;
     this.sortDirection = SortDirection.ASCENDING;
-
-    this.operations = []
   }
 
   public setSortedArray(arr: number[]): void {
@@ -92,9 +90,11 @@ export abstract class Simulator {
     return this.swapsCounter;
   }
 
-  public get getSortDirection(): sortDirectionType {
+  public get getSortDirection(): SortDirection {
     return this.sortDirection;
   }
+
+  public setSortDirection(value: SortDirection) {this.sortDirection = value;}
 
   public get getNumberOfLastStep(): number {
     return this.numberOfLastStep;
