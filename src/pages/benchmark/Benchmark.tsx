@@ -1,197 +1,193 @@
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Input,
-  Select,
-  SelectItem,
-  Switch,
-} from "@nextui-org/react";
-import React, { useCallback, useState } from "react";
-import BenchAlg, { typeOperation } from "./BenchAlg.tsx";
-import { Generator } from "../../logic/simulator/Generator.ts";
+import React, { useEffect, useState } from "react";
+import { Generator } from "../../logic/simulator_new/Generator.ts";
+import { Select, SelectItem, Spinner } from "@nextui-org/react";
+import { setsNumberOfElements } from "./BenchmarkPage.tsx";
 
-export const setsNumberOfElements = [
-  { key: 10000, label: "10000" },
-  { key: 20000, label: "20000" },
-  { key: 50000, label: "50000" },
-  { key: 100000, label: "100000" },
-  { key: 200000, label: "200000" },
-];
+export type typeOperation = "start" | "stop" | null;
 
-const Benchmark = () => {
-  const [trigger, setTrigger] = useState<boolean>(false);
-  const [operation, setOperation] = useState<typeOperation>(null);
-  const [childrenStatus, setChildrenStatus] = useState<Record<number, boolean>>(
-    {},
-  );
+interface Props {
+  trigger: boolean;
+  operation: typeOperation;
+  dataHaveToBeTheSame: boolean;
+  data?: number[];
+  sendDataToParent: (data: boolean) => void;
+}
 
-  const [dataHaveToBeTheSame, setDataHaveToBeTheSame] =
-    useState<boolean>(false);
-  const [dataToSort, setDataToSort] = useState<number[] | undefined>(undefined);
-
-  const [numberOfElements, setNumberOfElements] = useState<number>(4);
-  const [fromNumber, setFromNumber] = useState<number>(0);
-  const [toNumber, setToNumber] = useState<number>(0);
-
-  const isValid = useCallback(() => {
-    const statusValues = Object.values(childrenStatus);
-
-    return (
-      statusValues.length > 0 && statusValues.every((status) => status === true)
-    );
-  }, [childrenStatus]);
-
-  const handleDataFromChild = useCallback((data: boolean, index: number) => {
-    setChildrenStatus((prev) => ({
-      ...prev,
-      [index]: data,
-    }));
-  }, []);
-
-  const benchmarks = [
-    { id: 1, label: "Benchmark 1" },
-    { id: 2, label: "Benchmark 2" },
-    { id: 3, label: "Benchmark 3" },
+const Benchmark = (props: Props) => {
+  const simulators = [
+    { key: "bubble", label: "Bubble Sort" },
+    { key: "insertion", label: "Insertion Sort" },
+    { key: "selection", label: "Selection Sort" },
+    { key: "quick", label: "Quick Sort" },
   ];
 
-  const handleGenerateData = () => {
-    const generator: Generator = new Generator();
-    const arr = generator.generateArrayOfRandomData(
-      numberOfElements,
-      fromNumber,
-      toNumber,
-    );
-    setDataToSort(arr);
+  const [sortAlg, setSortAlg] = useState<string | null>(null);
+  const [algLoading, setAlgLoading] = useState<boolean>(false);
+  const [numberOfElements, setNumberOfElements] = useState<string | null>(null);
+  const [firstResultData, setFirstResultData] = useState<number | null>(null);
+  const [worker, setWorker] = useState<Worker | null>(null);
+
+  const [isDataDelivered, setIsDataDelivered] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (props.dataHaveToBeTheSame) {
+      setIsDataDelivered(true);
+    }
+  }, [props.data]);
+
+  useEffect(() => {
+    const isValidConfig = Boolean(sortAlg && numberOfElements);
+    props.sendDataToParent(isValidConfig);
+  }, [sortAlg, numberOfElements]);
+
+  useEffect(() => {
+    switch (props.operation) {
+      case "start":
+        handleBenchmarkStart();
+        break;
+      case "stop":
+        handleStopWorker();
+        break;
+      default:
+        console.log("nic");
+        break;
+    }
+  }, [props.trigger]);
+
+  const handleSelectionSortAlg = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const updatedValue = e.target.value;
+
+    setSortAlg(updatedValue);
   };
 
+  const handleBenchmarkStart = () => {
+    // WebWorker dla pierwszego algorytmu
+    const generator = new Generator();
+    if (!numberOfElements) {
+      return;
+    }
+    const numOfElements: number = Number(numberOfElements);
+
+    let arr: number[] | undefined = [];
+
+    if (props.dataHaveToBeTheSame) {
+      arr = props.data;
+    } else {
+      arr = generator.generateArrayOfRandomData(0, 150, numOfElements);
+    }
+
+    if (sortAlg && numberOfElements) {
+      const newWorker = new Worker(
+        new URL("../../logic/simulator_new/SortWorker.ts", import.meta.url),
+        {
+          type: "module",
+        },
+      );
+
+      setAlgLoading(true);
+      newWorker.postMessage({
+        algorithm: sortAlg,
+        dataToSort: arr,
+      });
+
+      newWorker.onmessage = (e) => {
+        const { result, error } = e.data;
+        if (!error) {
+          setFirstResultData(result.execTime);
+        } else {
+          setFirstResultData(error.toString());
+        }
+        newWorker.terminate();
+        setAlgLoading(false);
+      };
+      setWorker(newWorker);
+    }
+  };
+
+  const handleSelectionNumberOfElements = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const updatedValue = e.target.value;
+    setNumberOfElements(updatedValue);
+  };
+
+  function handleStopWorker(): void {
+    if (worker) {
+      worker.terminate();
+      setWorker(null);
+      setAlgLoading(false);
+    }
+  }
+
   return (
-    <div className={"flex flex-row justify-between  gap-lg p-4 w-full"}>
-      <Card className={" w-1/4"}>
-        <CardHeader>
-          <h2 className={"w-full text-center"}>Generator danych</h2>
-        </CardHeader>
-        <CardBody className={"flex flex-col gap-lg"}>
-          <div className={"flex flex-col gap-lg mb-auto"}>
-            <div className={"flex flex-row justify-between"}>
-              <p>Takie same dane </p>
-              <Switch
-                onChange={() =>
-                  setDataHaveToBeTheSame((prev) => {
-                    console.log(!prev);
-                    return !prev;
-                  })
-                }
-                aria-label={
-                  "Czy dane mają być takie same dla każdego algorytmu"
-                }
-              />
-            </div>
-
-            <div className={"flex flex-row justify-between "}>
-              <p className={"w-1/2"}>Liczba elementów:</p>
-              <Select
-                isDisabled={!dataHaveToBeTheSame}
-                aria-label={"Liczba elementów"}
-                className={"w-1/2"}
-              >
-                {setsNumberOfElements.map((number) => (
-                  <SelectItem key={number.key}>{number.label}</SelectItem>
-                ))}
-              </Select>
-            </div>
-
-            <div className={"flex flex-row justify-between "}>
-              <p className={"w-1/2"}>Zakres dolny:</p>
-              <Input
-                type={"number"}
-                min={0}
-                max={9999}
-                isDisabled={!dataHaveToBeTheSame}
-                aria-label={"Zakres dolny"}
-                className={"w-1/2"}
-              />
-            </div>
-
-            <div className={"flex flex-row justify-between "}>
-              <p className={"w-1/2"}>Zakres górny:</p>
-              <Input
-                type={"number"}
-                min={0}
-                max={9999}
-                isDisabled={!dataHaveToBeTheSame}
-                aria-label={"Zakres górny"}
-                className={"w-1/2"}
-              />
-            </div>
-          </div>
-
-          <div
-            className={
-              "flex flex-col gap-lg w-full justify-end items-end mt-auto p-4"
-            }
+    <div className={"flex flex-col w-1/3 p-4"}>
+      <div className={"flex flex-col"}>
+        <div className={"flex flex-row items-center py-4"}>
+          <p className={"w-1/2"}>Liczba elementów: </p>
+          <Select
+            isDisabled={props.dataHaveToBeTheSame}
+            aria-label={"Liczba elementów"}
+            placeholder="nie wybrano"
+            className={"w-1/2"}
+            selectedKeys={numberOfElements ? [numberOfElements] : undefined}
+            onChange={handleSelectionNumberOfElements}
           >
-            <div className={"flex flex-row gap-lg"}>
-              <Button color={"primary"} onPress={handleGenerateData}>
-                Wygeneruj dane
-              </Button>
-            </div>
-          </div>
-        </CardBody>
-      </Card>
-      <div className={"flex flex-col gap-lg w-3/4"}>
-        <Card >
-          <CardHeader>
-            <h2 className={"text-center w-full"}>Symulatory wydajności</h2>
-          </CardHeader>
-          <CardBody className={"flex flex-row justify-around"}>
-            {benchmarks.map((benchmark, index) => (
-              <BenchAlg
-                key={benchmark.id}
-                trigger={trigger}
-                operation={operation}
-                dataHaveToBeTheSame={dataHaveToBeTheSame}
-                data={dataToSort}
-                sendDataToParent={(data) => handleDataFromChild(data, index)}
-              />
+            {setsNumberOfElements.map((number) => (
+              <SelectItem key={number.key}>{number.label}</SelectItem>
             ))}
-          </CardBody>
-        </Card>
+          </Select>
+        </div>
+        <div className={"flex flex-row items-center py-4"}>
+          <p className={"w-1/2"}>Wybierz algorytm:</p>
+          <Select
+            aria-label={"Wybierz algorytm"}
+            className={"w-1/2"}
+            placeholder="nie wybrano"
+            selectedKeys={sortAlg ? [sortAlg] : undefined}
+            onChange={handleSelectionSortAlg}
+          >
+            {simulators.map((simulator) => (
+              <SelectItem key={simulator.key}>{simulator.label}</SelectItem>
+            ))}
+          </Select>
+        </div>
 
-        <Card >
-          <CardHeader>
-            <h2 className={"text-center w-full"}>Sterowanie symulacją</h2>
-          </CardHeader>
-          <CardBody>
-            <div className={"flex flex-row justify-end gap-lg p-4"}>
-              <Button
-                onPress={() => {
-                  setTrigger((trigger) => !trigger);
-                  setOperation("stop");
-                }}
-                isDisabled={!isValid()}
-                color={"danger"}
-              >
-                Zatrzymaj Symulacje
-              </Button>
-
-              <Button
-                onPress={() => {
-                  setTrigger((trigger) => !trigger);
-                  setOperation("start");
-                }}
-                isDisabled={!isValid()}
-                color={"primary"}
-              >
-                Symuluj
-              </Button>
-            </div>
-          </CardBody>
-        </Card>
+        <div
+          className={
+            "flex flex-col   p-4 min-h-40 bg-background-50 rounded-2xl"
+          }
+        >
+          <p>Wyniki:</p>
+          <div className={"flex flex-col py-4 gap-lg"}>
+            {!algLoading ? (
+              <div className={"flex flex-col py-4 gap-sm"}>
+                <div className={"flex flex-row justify-between"}>
+                  <p>Czas trwania symulacji:</p>
+                  <p> {firstResultData} s</p>
+                </div>
+                <div className={"flex flex-row justify-between"}>
+                  <p>Całkowita ilość kroków:</p>
+                  <p>zmienna </p>
+                </div>
+                <div className={"flex flex-row justify-between"}>
+                  <p>Ilość zamian:</p>
+                  <p>zmienna </p>
+                </div>
+                <div className={"flex flex-row justify-between"}>
+                  <p>Ilość kroków bez zamian:</p>
+                  <p>zmienna </p>
+                </div>
+              </div>
+            ) : (
+              <div className={"flex flex-row items-center gap-lg"}>
+                <p>Symulowanie...</p>
+                <Spinner />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
-
 export default Benchmark;

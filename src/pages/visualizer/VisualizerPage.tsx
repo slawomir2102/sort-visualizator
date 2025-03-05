@@ -18,20 +18,21 @@ import {
 
 import React, { useEffect, useState } from "react";
 
-import { NewSimulator } from "../../logic/newSimulator.tsx";
+import { Simulator } from "../../logic/simulator_new/Simulator.tsx";
 
-import { Generator } from "../../logic/simulator/Generator.ts";
+import { Generator } from "../../logic/simulator_new/Generator.ts";
 import { MdInfo } from "react-icons/md";
 import PopoverWrapper from "../../components/popover_wrapper/PopoverWrapper.tsx";
 import BlurOverlay from "../../components/blur_overlay/BlurOverlay.tsx";
 
 export type sortDirectionType = "ASCENDING" | "DESCENDING";
 
-const Visualizator = () => {
+const VisualizerPage = () => {
   const simulators = [
     { key: "bubbleSort", label: "Bubble Sort" },
     { key: "quickSort", label: "Quick Sort" },
     { key: "insertionSort", label: "Insertion Sort" },
+    { key: "selectionSort", label: "Selection Sort" },
   ];
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -389,7 +390,7 @@ const Visualizator = () => {
 
             {isLoading && <Spinner size={"lg"} />}
             {simulate && !isLoading && (
-              <NewSimulator
+              <Simulator
                 deliveredDataToSort={dataToSort}
                 selectedAlgorithm={sortType}
                 deliveredSortDirection={sortDirection}
@@ -401,4 +402,4 @@ const Visualizator = () => {
     </div>
   );
 };
-export default Visualizator;
+export default VisualizerPage;

@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Simulator } from "./newSimulator.ts";
+import { Simulator } from "./Simulator.ts";
 import { useDisclosure } from "@nextui-org/react";
 import {
   animationType,
@@ -15,13 +15,15 @@ import {
   SimDirection,
   SimDirectionType,
 } from "./SimulatorTypes.ts";
-import { InsertionSort } from "./InsertionSort.ts";
-import { BubbleSort } from "./BubbleSort.ts";
+import { InsertionSort } from "./insertion_sort/InsertionSort.ts";
+import { BubbleSort } from "./bubble_sort/BubbleSort.ts";
+import {SelectionSort} from "./selection_sort/SelectionSort.ts";
+import {QuickSort} from "./quick_sort/QuickSort.ts";
 
 interface SimulatorContextType {
-  simulator: BubbleSort | InsertionSort | null;
-  setSimulator: (simulator: BubbleSort | InsertionSort | null) => void;
-  simulatorRef: RefObject<BubbleSort | InsertionSort | null>;
+  simulator: BubbleSort | InsertionSort | SelectionSort |QuickSort| null;
+  simulatorRef: RefObject<BubbleSort | InsertionSort | SelectionSort |QuickSort| null>;
+  setSimulator: (simulator: BubbleSort | InsertionSort | SelectionSort |QuickSort| null) => void;
   getSimulator: (callback: (simulator: Simulator) => void) => void;
 
   setSimDataToSort: (arr: number[]) => void;
@@ -48,8 +50,7 @@ interface SimulatorContextType {
   setAnimationSpeed: (speed: number) => void;
   animationTypeChoose: () => void;
   stopAnimation: () => void;
-
-  isSimulatorReady: () => boolean;
+  downloadJSONFile: () => void;
 }
 
 const SimulatorContext = createContext<SimulatorContextType | undefined>(
@@ -61,10 +62,10 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export const SimulatorProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [simulator, setSimulator] = useState<BubbleSort | InsertionSort | null>(
+  const [simulator, setSimulator] = useState<BubbleSort | InsertionSort | SelectionSort| QuickSort | null>(
     null,
   );
-  const simulatorRef = useRef<BubbleSort | InsertionSort | null>(null);
+  const simulatorRef = useRef<BubbleSort | InsertionSort | SelectionSort |QuickSort| null>(null);
 
   const [simDataToSort, setSimDataToSort] = useState<number[]>([]);
   const [simStepToGo, setSimStepToGo] = useState<number>(0);
@@ -82,8 +83,6 @@ export const SimulatorProvider: React.FC<{ children: React.ReactNode }> = ({
   const [simIsRunning, setSimIsRunning] = useState<boolean>(false);
 
   const simForceStopRef = useRef<boolean>(false);
-
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   useEffect(() => {
     simulatorRef.current = simulator;
@@ -140,6 +139,8 @@ export const SimulatorProvider: React.FC<{ children: React.ReactNode }> = ({
         for (let i = sim.getCurrentStep; i < stepToGo; i++) {
           if (simAnimationSpeed !== SimAnimationSpeed.Instant) {
             await sleep(simAnimationSpeed);
+          } else {
+            await sleep(10)
           }
           if (simForceStopRef.current) break;
           nextStep();
@@ -150,6 +151,8 @@ export const SimulatorProvider: React.FC<{ children: React.ReactNode }> = ({
         for (let i = sim.getCurrentStep; i > stepToGo; i--) {
           if (simAnimationSpeed !== SimAnimationSpeed.Instant) {
             await sleep(simAnimationSpeed);
+          } else {
+            await sleep(10)
           }
           if (simForceStopRef.current) break;
           prevStep();
@@ -194,6 +197,20 @@ export const SimulatorProvider: React.FC<{ children: React.ReactNode }> = ({
     simForceStopRef.current = false;
   };
 
+  const downloadJSONFile = () => {
+    getSimulator((sim) => {
+      const jsonString = sim.generateJSONFile();
+
+      if (!jsonString) return;
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "simulator.json";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    })
+  }
+
   const value = {
     simulator,
     setSimulator,
@@ -220,7 +237,7 @@ export const SimulatorProvider: React.FC<{ children: React.ReactNode }> = ({
     setAnimationSpeed: setSimAnimationSpeed,
     animationTypeChoose,
     stopAnimation,
-    isSimulatorReady: () => simulator !== null,
+    downloadJSONFile,
     getSimulator,
   };
 

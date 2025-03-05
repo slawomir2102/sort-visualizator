@@ -1,6 +1,6 @@
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
 
-const Home = () => {
+const HomePage = () => {
   return (
     <Card className={"w-5/6 h-5/6"}>
       <CardHeader>
@@ -19,4 +19,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default HomePage;

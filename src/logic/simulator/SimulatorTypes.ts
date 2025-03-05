@@ -9,21 +9,6 @@ export type SimulatorStateType =
   | SimulatorState.DuringSorting
   | SimulatorState.Sorted;
 
-export enum SortOperation {
-  Compare = 0,
-  Swap = 1,
-  Insert = 2,
-  KeySelection = 3,
-  Shift = 4,
-}
-
-export type sortOperationType =
-  | SortOperation.Swap
-  | SortOperation.Compare
-  | SortOperation.Insert
-  | SortOperation.KeySelection
-  | SortOperation.Shift;
-
 export enum SortDirection {
   ASCENDING = 0,
   DESCENDING = 1,
@@ -64,35 +49,3 @@ export type SimAnimationSpeedType =
 export type sortDirectionType =
   | SortDirection.ASCENDING
   | SortDirection.DESCENDING;
-
-export type BubbleSortOperationType = {
-  leftNumber: {
-    position: number;
-    value: number;
-  };
-  rightNumber: {
-    position: number;
-    value: number;
-  };
-  sortedElements: {
-    position: number[];
-    value: number[];
-  };
-  typeOperation: sortOperationType;
-};
-
-export type InsertionTypeOperation =
-  | SortOperation.Compare
-  | SortOperation.Insert
-  | SortOperation.KeySelection
-  | SortOperation.Shift;
-
-export type InsertionSortOperation = {
-  key: { index: number; value: number };
-  comparedElement?: { index: number; value: number };
-  shiftedElement?: { index: number; value: number };
-  newPosition?: number;
-  insertedPosition?: number;
-  sortedElements?: { indexes: number[]; values: number[] };
-  typeOperation: InsertionTypeOperation;
-};

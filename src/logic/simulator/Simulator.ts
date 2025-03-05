@@ -1,11 +1,10 @@
 import {
-  BubbleSortOperationType,
-  InsertionSortOperationType,
-  SimulatorState,
+
   SortDirection,
   sortDirectionType,
-  sortOperationType,
+
 } from "./SimulatorTypes.ts";
+
 
 export function MeasureExecutionTime(
   _target: object,
@@ -36,6 +35,10 @@ export function MeasureExecutionTime(
   return descriptor;
 }
 
+export interface BaseSortStep {
+  sortedElements?: { indexes: number[]; values: number[] };
+}
+
 export abstract class Simulator {
   protected executionTimes: Record<string, number> = {};
   protected originalArray: number[];
@@ -46,9 +49,19 @@ export abstract class Simulator {
   protected numberOfLastStep: number;
   protected swapsCounter: number;
 
-  public abstract operations:
-    | BubbleSortOperationType[]
-    | InsertionSortOperationType[];
+  protected abstract operations: BaseSortStep[];
+
+  protected constructor() {
+    this.originalArray = [];
+    this.currentArray = [];
+    this.sortedArray = [];
+    this.currentStep = 0;
+    this.numberOfLastStep = 0;
+    this.swapsCounter = 0;
+    this.sortDirection = SortDirection.ASCENDING;
+
+    this.operations = []
+  }
 
   public setSortedArray(arr: number[]): void {
     this.sortedArray = arr;
@@ -87,15 +100,7 @@ export abstract class Simulator {
     return this.numberOfLastStep;
   }
 
-  protected constructor() {
-    this.originalArray = [];
-    this.currentArray = [];
-    this.sortedArray = [];
-    this.currentStep = 0;
-    this.numberOfLastStep = 0;
-    this.swapsCounter = 0;
-    this.sortDirection = SortDirection.ASCENDING;
-  }
+
 
   public nextStep() {
     if (this.currentStep > this.numberOfLastStep - 1) {
@@ -177,7 +182,7 @@ export abstract class Simulator {
   public abstract generateSimulatorSteps(): void;
   public abstract sort(): number[];
   public abstract generateCurrentStepDescription(): string;
-  public abstract generateJSONFile(): void;
+  public abstract generateJSONFile(): string;
 
   // extra functions
 

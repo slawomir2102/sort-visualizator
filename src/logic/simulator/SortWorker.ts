@@ -1,5 +1,7 @@
-import { BubbleSortSimulator } from "./BubbleSort.ts";
-import { QuickSortSimulator } from "./QuickSort.ts";
+import { BubbleSort } from "./bubble_sort/BubbleSort.ts";
+import { QuickSort } from "./quick_sort/QuickSort.ts";
+import {InsertionSort} from "./insertion_sort/InsertionSort.ts"
+import {SelectionSort} from "./selection_sort/SelectionSort.ts"
 
 self.onmessage = function (e) {
   try {
@@ -8,29 +10,26 @@ self.onmessage = function (e) {
     let simulator;
     switch (algorithm) {
       case "bubble":
-        simulator = new BubbleSortSimulator();
+        simulator = new BubbleSort();
         break;
-      // case "insertion":
-      //   firstSimulator = new InsertionSortSimulator();
-      //   break;
-      // case "selection":
-      //   firstSimulator = new SelectionSortSimulator();
-      //   break;
+      case "insertion":
+        simulator = new InsertionSort();
+        break;
+      case "selection":
+        simulator = new SelectionSort();
+        break;
       case "quick":
-        simulator = new QuickSortSimulator();
+        simulator = new QuickSort();
         break;
-      // case "merge":
-      //   firstSimulator = new MergeSortSimulator();
-      //   break;
       default:
         throw new Error("Invalid sorting algorithm");
     }
 
     simulator.setData(dataToSort);
 
-    simulator.sortWithoutSteps();
-    const time: number = simulator.getExecutionTimeFor(
-      "sortWithoutSteps",
+    simulator.sort();
+    const time = simulator.getExecutionTimeFor(
+      "sort",
       6,
       "s",
     );
