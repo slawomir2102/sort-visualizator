@@ -2,10 +2,10 @@ import ChartBox from "../../../components/chart_box/ChartBox.tsx";
 import { useSimulator } from "../SimulatorContext.tsx";
 
 import { useEffect, useState } from "react";
-import {BubbleSortStep} from "./BubbleSort.ts";
+import { BubbleSortStep } from "./BubbleSort.ts";
 
 export const BubbleSortVisualizer = () => {
-  const { simulator, setSimulator, simContext } = useSimulator();
+  const { simulator, simContext } = useSimulator();
 
   const [activeBoxI, setActiveBoxI] = useState<number | null>(null);
   const [activeBoxJ, setActiveBoxJ] = useState<number | null>(null);
@@ -30,7 +30,9 @@ export const BubbleSortVisualizer = () => {
       return;
     }
 
-    const currentOperation: BubbleSortStep = simulator.operations[currentStep];
+    const currentOperation: BubbleSortStep = simulator.operations[
+      currentStep
+    ] as BubbleSortStep;
 
     if (!currentOperation) {
       return;
@@ -54,34 +56,34 @@ export const BubbleSortVisualizer = () => {
     // Handle sorted elements differently based on direction
     if (steppingDirection === "forward") {
       // When moving forward, add new sorted elements
-      if (
-          currentOperation.sortedElements &&
-          (currentOperation.sortedElements.indexes || currentOperation.sortedElements.indexes)
-      ) {
-        setSortedIndexes((prevSorted) => {
-          const newSorted = [...prevSorted];
 
-          // Handle both position and indexes properties to be compatible with both algorithms
-          const positions = currentOperation.sortedElements.indexes ||
-              currentOperation.sortedElements.indexes || [];
+      setSortedIndexes((prevSorted) => {
+        const newSorted = [...prevSorted];
 
-          // Add any new sorted positions that aren't already tracked
-          positions.forEach((pos) => {
-            if (!newSorted.includes(pos)) {
-              newSorted.push(pos);
-            }
-          });
+        // Handle both position and indexes properties to be compatible with both algorithms
+        if (currentOperation.sortedElements === undefined) return prevSorted;
 
-          return newSorted;
+        const positions =
+          currentOperation.sortedElements.indexes ||
+          currentOperation.sortedElements.indexes ||
+          [];
+
+        // Add any new sorted positions that aren't already tracked
+        positions.forEach((pos) => {
+          if (!newSorted.includes(pos)) {
+            newSorted.push(pos);
+          }
         });
-      }
+
+        return newSorted;
+      });
 
       // Check if this is the final step of the algorithm
       if (currentStep === simulator.operations.length - 1) {
         // Ensure all elements are marked as sorted at the end of the algorithm
         const allIndexes = Array.from(
-            { length: simContext.simDataToSort.length },
-            (_, i) => i,
+          { length: simContext.simDataToSort.length },
+          (_, i) => i,
         );
         setSortedIndexes(allIndexes);
       }
@@ -111,11 +113,15 @@ export const BubbleSortVisualizer = () => {
     for (let i = 0; i <= step; i++) {
       if (i >= simulator.operations.length) break;
 
-      const operation: BubbleSortStep = simulator.operations[i];
+      const operation: BubbleSortStep = simulator.operations[
+        i
+      ] as BubbleSortStep;
       if (operation.sortedElements) {
         // Handle both position and indexes properties to be compatible with both algorithms
-        const positions = operation.sortedElements.indexes ||
-            operation.sortedElements.indexes || [];
+        const positions =
+          operation.sortedElements.indexes ||
+          operation.sortedElements.indexes ||
+          [];
 
         // Add any new sorted positions that aren't already tracked
         positions.forEach((pos) => {
@@ -130,7 +136,7 @@ export const BubbleSortVisualizer = () => {
     if (step === simulator.operations.length - 1) {
       // Ensure all elements are marked as sorted at the end of the algorithm
       return setSortedIndexes(
-          Array.from({ length: simContext.simDataToSort.length }, (_, i) => i),
+        Array.from({ length: simContext.simDataToSort.length }, (_, i) => i),
       );
     }
 
@@ -144,10 +150,11 @@ export const BubbleSortVisualizer = () => {
 
     // Set initial comparison elements if simulator is available
     if (simulator && simulator.operations && simulator.operations.length > 0) {
-      const initialOp: BubbleSortStep = simulator.operations[0];
+      const initialOp: BubbleSortStep = simulator
+        .operations[0] as BubbleSortStep;
       if (initialOp && initialOp.leftNumber && initialOp.rightNumber) {
-          setActiveBoxI(initialOp.leftNumber.index);
-          setActiveBoxJ(initialOp.rightNumber.index);
+        setActiveBoxI(initialOp.leftNumber.index);
+        setActiveBoxJ(initialOp.rightNumber.index);
       }
     }
   }, [simContext.simDataToSort, simulator]);
@@ -157,41 +164,41 @@ export const BubbleSortVisualizer = () => {
   }
 
   return (
-      <div className="flex flex-row items-end gap-xl h-40">
-        {simContext.simDataToSort.map((item, index) => {
-          // Prioritize highlighting: sorted status first, then active comparison elements
-          const isSorted = sortedIndexes.includes(index);
-          const isActiveI = index === activeBoxI;
-          const isActiveJ = index === activeBoxJ;
+    <div className="flex flex-row items-end gap-xl h-40">
+      {simContext.simDataToSort.map((item, index) => {
+        // Prioritize highlighting: sorted status first, then active comparison elements
+        const isSorted = sortedIndexes.includes(index);
+        const isActiveI = index === activeBoxI;
+        const isActiveJ = index === activeBoxJ;
 
-          // Determine the appropriate CSS class based on element status
-          let className = "";
+        // Determine the appropriate CSS class based on element status
+        let className = "";
 
-          if (isSorted) {
-            className = "!bg-pink-200"; // Sorted elements
+        if (isSorted) {
+          className = "!bg-pink-200"; // Sorted elements
 
-            // If element is sorted but also being compared, add a border or different style
-            if (isActiveI) {
-              className = "!bg-pink-200 border-2 border-blue-500";
-            } else if (isActiveJ) {
-              className = "!bg-pink-200 border-2 border-green-500";
-            }
-          } else if (isActiveI) {
-            className = "!bg-blue-300"; // Current left comparison element
+          // If element is sorted but also being compared, add a border or different style
+          if (isActiveI) {
+            className = "!bg-pink-200 border-2 border-blue-500";
           } else if (isActiveJ) {
-            className = "!bg-green-300"; // Current right comparison element
+            className = "!bg-pink-200 border-2 border-green-500";
           }
+        } else if (isActiveI) {
+          className = "!bg-blue-300"; // Current left comparison element
+        } else if (isActiveJ) {
+          className = "!bg-green-300"; // Current right comparison element
+        }
 
-          return (
-              <ChartBox
-                  key={index}
-                  index={index}
-                  label={item}
-                  height={item}
-                  className={className}
-              />
-          );
-        })}
-      </div>
+        return (
+          <ChartBox
+            key={index}
+            index={index}
+            label={item}
+            height={item}
+            className={className}
+          />
+        );
+      })}
+    </div>
   );
 };

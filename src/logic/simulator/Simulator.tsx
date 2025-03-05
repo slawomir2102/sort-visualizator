@@ -15,7 +15,7 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 import {
   MdDownload,
@@ -29,62 +29,66 @@ import { BubbleSort } from "./bubble_sort/BubbleSort.ts";
 import { InsertionSort } from "./insertion_sort/InsertionSort.ts";
 import { useSimulator } from "./SimulatorContext.tsx";
 import { BubbleSortVisualizer } from "./bubble_sort/BubbleSortVisualizer.tsx";
-import {animationList, Simulators, SortDirection} from "./SimulatorTypes.ts";
+import {
+  AlgorithmsNames,
+  animationList,
+  Simulators,
+  SortDirection,
+} from "./SimulatorTypes.ts";
 import { InsertionSortVisualizer } from "./insertion_sort/InsertionSortVisualizer.tsx";
-import {SelectionSort} from "./selection_sort/SelectionSort.ts";
-import {SelectionSortVisualizer} from "./selection_sort/SelectionSortVisualizer.tsx";
-import {QuickSortVisualizer} from "./quick_sort/QuickSortVisualizer.tsx";
-import {QuickSort} from "./quick_sort/QuickSort.ts";
-import BlurOverlay from "../../components/blur_overlay/BlurOverlay.tsx";
+import { SelectionSort } from "./selection_sort/SelectionSort.ts";
+import { SelectionSortVisualizer } from "./selection_sort/SelectionSortVisualizer.tsx";
+import { QuickSortVisualizer } from "./quick_sort/QuickSortVisualizer.tsx";
+import { QuickSort } from "./quick_sort/QuickSort.ts";
 import PopoverWrapper from "../../components/popover_wrapper/PopoverWrapper.tsx";
-import {isBezierDefinition} from "framer-motion";
 
 export function Simulator({
-                               deliveredDataToSort,
-                               selectedAlgorithm,
-                               deliveredSortDirection,
-                            deliveredIsSecondBlurActive,
-                             }: {
+  deliveredDataToSort,
+  selectedAlgorithm,
+  deliveredSortDirection,
+  deliveredIsSecondBlurActive,
+}: {
   deliveredDataToSort: number[];
-  selectedAlgorithm: string;
+  selectedAlgorithm: AlgorithmsNames | "";
   deliveredSortDirection: SortDirection;
   deliveredIsSecondBlurActive: boolean;
 }) {
   const { simulator, setSimulator, simContext } = useSimulator();
 
   useEffect(() => {
-    setIsSecondBlurActive(deliveredIsSecondBlurActive)
+    setIsSecondBlurActive(deliveredIsSecondBlurActive);
 
     if (!deliveredDataToSort) return; // upewnij się, że dane są dostępne
     let sim: Simulators;
 
     switch (selectedAlgorithm) {
-      case "bubbleSort":
+      case AlgorithmsNames.BubbleSort:
         sim = new BubbleSort();
         break;
-      case "insertionSort":
+      case AlgorithmsNames.InsertionSort:
         sim = new InsertionSort();
         break;
-      case "selectionSort":
+      case AlgorithmsNames.SelectionSort:
         sim = new SelectionSort();
         break;
-      case "quickSort":
+      case AlgorithmsNames.QuickSort:
         sim = new QuickSort();
         break;
       default:
-        sim = new BubbleSort();
+        sim = null;
         break;
     }
+    if (!sim) return;
 
     sim.setData(deliveredDataToSort);
-    sim.setSortDirection(deliveredSortDirection)
+    sim.setSortDirection(deliveredSortDirection);
     sim.generateSimulatorSteps();
     simContext.setSimDataToSort(deliveredDataToSort);
     setSimulator(sim);
   }, [deliveredDataToSort, selectedAlgorithm]);
 
   const { isOpen, onOpenChange, onOpen } = useDisclosure();
-  const [isSecondBlurActive, setIsSecondBlurActive] = useState(false);
+  const [, setIsSecondBlurActive] = useState(false);
 
   if (!simulator) {
     return <div>nie dziala</div>;
@@ -93,263 +97,370 @@ export function Simulator({
   const iconSize = 20;
 
   return (
-      <div className={"w-full relative"}>
-
-        {simulator ? (
-            <div className={"w-full"}>
-              <div className={"w-full flex flex-col gap-y-xl"}>
-                {" "}
-                <Modal size={"4xl"} isOpen={isOpen} onOpenChange={onOpenChange}>
-                  <ModalContent>
-                    {(onClose) => (
-                        <>
-                          <ModalHeader className="gap-1 flex flex-col">
-                            Szczegóły sortowania
-                          </ModalHeader>
-                          <ModalBody>
-                            <div className={'flex flex-col gap-xl'}>
-                              <ul className={"flex flex-col  gap-md"}>
-                                <p className={"font-bold w-full"}>Oryginalna tablica:</p>
-                                <div className={'flex w-full justify-between flex-wrap'}>
-
-
-                                {simulator.getOriginalArray.map(
-                                    (item: number, index: number) => (
-                                        <div className={'flex-[1_0_10%] flex flex-col justify-center items-center hover:bg-amber-200 p-2 rounded-xl'}>
-                                        <Button isDisabled={true} className={'min-w-4 !text-black'} key={index}>{item}</Button>
-                                          <p>{index}</p>
-                                        </div>
-                                    ),
-                                )}
+    <div className={"w-full relative"}>
+      {simulator ? (
+        <div className={"w-full"}>
+          <div className={"w-full flex flex-col gap-y-xl"}>
+            {" "}
+            <Modal size={"4xl"} isOpen={isOpen} onOpenChange={onOpenChange}>
+              <ModalContent>
+                {(onClose) => (
+                  <>
+                    <ModalHeader className="gap-1 flex flex-col">
+                      Szczegóły sortowania
+                    </ModalHeader>
+                    <ModalBody>
+                      <div className={"flex flex-col gap-xl"}>
+                        <ul className={"flex flex-col  gap-md"}>
+                          <p className={"font-bold w-full"}>
+                            Oryginalna tablica:
+                          </p>
+                          <div
+                            className={"flex w-full justify-between flex-wrap"}
+                          >
+                            {simulator.getOriginalArray.map(
+                              (item: number, index: number) => (
+                                <div
+                                  className={
+                                    "flex-[1_0_10%] flex flex-col justify-center items-center hover:bg-amber-200 p-2 rounded-xl"
+                                  }
+                                >
+                                  <Button
+                                    isDisabled={true}
+                                    className={"min-w-4 !text-black"}
+                                    key={index}
+                                  >
+                                    {item}
+                                  </Button>
+                                  <p>{index}</p>
                                 </div>
-                              </ul>
+                              ),
+                            )}
+                          </div>
+                        </ul>
 
-                              <ul className={"flex flex-col gap-md"}>
-                                <p className={"font-bold w-full"}>Posortowana tablica:</p>
-                                <div className={'flex w-full justify-between flex-wrap'}>
-
-
-                                  {simulator.getSortedArray.map(
-                                      (item: number, index: number) => (
-                                          <div className={'flex-[1_0_10%] flex flex-col justify-center items-center hover:bg-amber-200 p-2 rounded-xl'}>
-                                            <Button isDisabled={true} className={'min-w-4 !text-black'} key={index}>{item}</Button>
-                                            <p>{index}</p>
-                                          </div>
-                                      ),
-                                  )}
+                        <ul className={"flex flex-col gap-md"}>
+                          <p className={"font-bold w-full"}>
+                            Posortowana tablica:
+                          </p>
+                          <div
+                            className={"flex w-full justify-between flex-wrap"}
+                          >
+                            {simulator.getSortedArray.map(
+                              (item: number, index: number) => (
+                                <div
+                                  className={
+                                    "flex-[1_0_10%] flex flex-col justify-center items-center hover:bg-amber-200 p-2 rounded-xl"
+                                  }
+                                >
+                                  <Button
+                                    isDisabled={true}
+                                    className={"min-w-4 !text-black"}
+                                    key={index}
+                                  >
+                                    {item}
+                                  </Button>
+                                  <p>{index}</p>
                                 </div>
-                              </ul>
-                            </div>
-                            <div className={"flex flex-row gap-md"}>
-                              <p className={"font-bold"}>Liczba kroków: </p>
-                              {simulator.getNumberOfLastStep}
-                            </div>
-                            <div className={"flex flex-row gap-md"}>
-                              <p className={"font-bold"}>Liczba zamian: </p>
-                            </div>
-                            <div className={"flex flex-row gap-md"}>
-                              <p className={"font-bold"}>Liczba kroków bez zamian: </p>
-                            </div>
+                              ),
+                            )}
+                          </div>
+                        </ul>
+                      </div>
+                      <div className={"flex flex-row gap-md"}>
+                        <p className={"font-bold"}>Liczba kroków: </p>
+                        {simulator.getNumberOfLastStep}
+                      </div>
+                      <div className={"flex flex-row gap-md"}>
+                        <p className={"font-bold"}>Liczba zamian: </p>
+                      </div>
+                      <div className={"flex flex-row gap-md"}>
+                        <p className={"font-bold"}>
+                          Liczba kroków bez zamian:{" "}
+                        </p>
+                      </div>
 
-                            <div className={"flex flex-row gap-md"}></div>
-                            <Divider orientation="horizontal" />
-                          </ModalBody>
-                          <ModalFooter>
-                            <Button color="danger" variant="light" onPress={onClose}>
-                              Zamknij
-                            </Button>
-                          </ModalFooter>
-                        </>
-                    )}
-                  </ModalContent>
-                </Modal>
-                <PopoverWrapper placement={'top'} content={"Plansza z animowanymi elementami reprezentującymi dane w tablicy"} isVisible={deliveredIsSecondBlurActive} ariaLabel={"sort_board"}>
-                <div className={"flex flex-row items-end justify-center h-40"}>
+                      <div className={"flex flex-row gap-md"}></div>
+                      <Divider orientation="horizontal" />
+                    </ModalBody>
+                    <ModalFooter>
+                      <Button color="danger" variant="light" onPress={onClose}>
+                        Zamknij
+                      </Button>
+                    </ModalFooter>
+                  </>
+                )}
+              </ModalContent>
+            </Modal>
+            <PopoverWrapper
+              placement={"top"}
+              content={
+                "Plansza z animowanymi elementami reprezentującymi dane w tablicy"
+              }
+              isVisible={deliveredIsSecondBlurActive}
+              ariaLabel={"sort_board"}
+            >
+              <div className={"flex flex-row items-end justify-center h-40"}>
+                {selectedAlgorithm == "bubbleSort" ? (
+                  <BubbleSortVisualizer
+                    key={`bubble-${deliveredDataToSort.join("-")}`}
+                  />
+                ) : null}
 
-                  {selectedAlgorithm == "bubbleSort" ? (
-                      <BubbleSortVisualizer key={`bubble-${deliveredDataToSort.join('-')}`} />
-                  ) : null}
+                {selectedAlgorithm == "insertionSort" ? (
+                  <InsertionSortVisualizer
+                    key={`insertion-${deliveredDataToSort.join("-")}`}
+                  />
+                ) : null}
 
-                  {selectedAlgorithm == "insertionSort" ? (
-                      <InsertionSortVisualizer key={`insertion-${deliveredDataToSort.join('-')}`} />
-                  ) : null}
+                {selectedAlgorithm == "selectionSort" ? (
+                  <SelectionSortVisualizer
+                    key={`selection-${deliveredDataToSort.join("-")}`}
+                  />
+                ) : null}
 
-                  {selectedAlgorithm == "selectionSort" ? (
-                      <SelectionSortVisualizer key={`selection-${deliveredDataToSort.join('-')}`} />
-                  ) : null}
-
-                  {selectedAlgorithm == "quickSort" ? (
-                      <QuickSortVisualizer key={`quick-${deliveredDataToSort.join('-')}`} />
-                  ) : null}
-
-                </div>
-                </PopoverWrapper>
-                <PopoverWrapper placement={"top"} content={"Opisy każdego kroku sortowania"} isVisible={deliveredIsSecondBlurActive} ariaLabel={"step_desc"}>
-                <div
-                    className={
-                      "h-10 bg-background-50 rounded-xl p-10 flex items-center"
-                    }
+                {selectedAlgorithm == "quickSort" ? (
+                  <QuickSortVisualizer
+                    key={`quick-${deliveredDataToSort.join("-")}`}
+                  />
+                ) : null}
+              </div>
+            </PopoverWrapper>
+            <PopoverWrapper
+              placement={"top"}
+              content={"Opisy każdego kroku sortowania"}
+              isVisible={deliveredIsSecondBlurActive}
+              ariaLabel={"step_desc"}
+            >
+              <div
+                className={
+                  "h-10 bg-background-50 rounded-xl p-10 flex items-center"
+                }
+              >
+                {simContext.stepDescription}
+              </div>
+            </PopoverWrapper>
+            <div className={"flex flex-row justify-between"}>
+              <Card>
+                <PopoverWrapper
+                  placement={"top"}
+                  content={"Główny panel sterowania symulacją"}
+                  isVisible={deliveredIsSecondBlurActive}
+                  ariaLabel={"main_control_sim_panel"}
                 >
-                  {simContext.stepDescription}
-                </div>
-                </PopoverWrapper>
-
-                <div className={"flex flex-row justify-between"}>
-
-                  <Card>
-                    <PopoverWrapper placement={'top'} content={"Główny panel sterowania symulacją"} isVisible={deliveredIsSecondBlurActive} ariaLabel={"main_control_sim_panel"}>
-                    <CardHeader>
-                      <h2 className={""}>Sterowanie symulatorem</h2>
-                    </CardHeader>
-                    <CardBody className={"flex flex-row justify-evenly gap-lg"}>
-
-                      <PopoverWrapper placement={'top-end'} content={"Przycisk przenoszący do pierwszego kroku"} isVisible={deliveredIsSecondBlurActive} ariaLabel={"first_step_button"}>
+                  <CardHeader>
+                    <h2 className={""}>Sterowanie symulatorem</h2>
+                  </CardHeader>
+                  <CardBody className={"flex flex-row justify-evenly gap-lg"}>
+                    <PopoverWrapper
+                      placement={"top-end"}
+                      content={"Przycisk przenoszący do pierwszego kroku"}
+                      isVisible={deliveredIsSecondBlurActive}
+                      ariaLabel={"first_step_button"}
+                    >
                       <Button
-                          color={"primary"}
-                          isDisabled={simContext.simIsRunning}
-                          onPress={simContext.firstStep}
+                        color={"primary"}
+                        isDisabled={simContext.simIsRunning}
+                        onPress={simContext.firstStep}
                       >
                         <MdKeyboardDoubleArrowLeft size={iconSize} />
                         Pierwszy krok
                       </Button>
-                      </PopoverWrapper>
+                    </PopoverWrapper>
 
-                      <PopoverWrapper placement={'bottom-end'} content={"Przycisk przenoszący do poprzedniego kroku"} isVisible={deliveredIsSecondBlurActive} ariaLabel={"prev_step_button"}>
+                    <PopoverWrapper
+                      placement={"bottom-end"}
+                      content={"Przycisk przenoszący do poprzedniego kroku"}
+                      isVisible={deliveredIsSecondBlurActive}
+                      ariaLabel={"prev_step_button"}
+                    >
                       <Button
-                          color={"primary"}
-                          isDisabled={simContext.simIsRunning}
-                          onPress={simContext.prevStep}
+                        color={"primary"}
+                        isDisabled={simContext.simIsRunning}
+                        onPress={simContext.prevStep}
                       >
                         <IoMdArrowRoundBack size={iconSize} /> Poprzedni Krok
                       </Button>
+                    </PopoverWrapper>
 
-                      </PopoverWrapper>
+                    <PopoverWrapper
+                      placement={"top"}
+                      content={"Wskaźnik na aktualny numer kroku"}
+                      isVisible={deliveredIsSecondBlurActive}
+                      ariaLabel={"step_number"}
+                    >
+                      <Button isDisabled={true}>
+                        {simContext.simCurrentStep}
+                      </Button>
+                    </PopoverWrapper>
 
-                      <PopoverWrapper placement={'top'} content={"Wskaźnik na aktualny numer kroku"} isVisible={deliveredIsSecondBlurActive} ariaLabel={"step_number"}>
-
-                      <Button isDisabled={true}>{simContext.simCurrentStep}</Button>
-                      </PopoverWrapper>
-
-                      <PopoverWrapper placement={'bottom-start'} content={"Przycisk przenoszący do następnego kroku"} isVisible={deliveredIsSecondBlurActive} ariaLabel={"next_step_button"}>
+                    <PopoverWrapper
+                      placement={"bottom-start"}
+                      content={"Przycisk przenoszący do następnego kroku"}
+                      isVisible={deliveredIsSecondBlurActive}
+                      ariaLabel={"next_step_button"}
+                    >
                       <Button
-                          color={"primary"}
-                          isDisabled={simContext.simIsRunning}
-                          onPress={simContext.nextStep}
+                        color={"primary"}
+                        isDisabled={simContext.simIsRunning}
+                        onPress={simContext.nextStep}
                       >
                         Następny krok
                         <IoMdArrowRoundForward size={iconSize} />
                       </Button>
-                      </PopoverWrapper>
+                    </PopoverWrapper>
 
-                      <PopoverWrapper placement={'top-start'} content={"Przycisk przenoszący do ostatniego kroku"} isVisible={deliveredIsSecondBlurActive} ariaLabel={"last_step_button"}>
+                    <PopoverWrapper
+                      placement={"top-start"}
+                      content={"Przycisk przenoszący do ostatniego kroku"}
+                      isVisible={deliveredIsSecondBlurActive}
+                      ariaLabel={"last_step_button"}
+                    >
                       <Button
-                          color={"primary"}
-                          isDisabled={simContext.simIsRunning}
-                          onPress={simContext.lastStep}
+                        color={"primary"}
+                        isDisabled={simContext.simIsRunning}
+                        onPress={simContext.lastStep}
                       >
                         Ostatni krok
                         <MdKeyboardDoubleArrowRight size={iconSize} />
                       </Button>
-                      </PopoverWrapper>
-                    </CardBody>
                     </PopoverWrapper>
-                  </Card>
+                  </CardBody>
+                </PopoverWrapper>
+              </Card>
 
-                  <Card>
-                    <CardHeader>
-                      <div className={'flex flex-row justify-between gap-md w-full'}>
-                        <p>
-                          Skocz do kroku
-                        </p>
-                        <p>
-                          [0 -{" "}{simulator.getNumberOfLastStep}]
-                        </p>
-                      </div>
-                    </CardHeader>
-                    <CardBody
-                        className={"flex flex-row justify-evenly items-center gap-lg"}
+              <Card>
+                <PopoverWrapper
+                  placement={"top-end"}
+                  content={
+                    "Moduł do dynamicznego przeskakiwania pomiędzy wybranymi krokami"
+                  }
+                  isVisible={deliveredIsSecondBlurActive}
+                  ariaLabel={"jump_module"}
+                >
+                  <CardHeader>
+                    <div
+                      className={"flex flex-row justify-between gap-md w-full"}
                     >
-
-                      <Input
-                          type={"number"}
-                          min={0}
-                          max={simulator.getNumberOfLastStep}
-                          errorMessage={" "}
-                          onChange={(e) =>
-                              simContext.setSimStepToGo(Number(e.target.value))
-                          }
-                          className={"max-w-16 max-h-12  relative"}
-                      />
+                      <p>Skocz do kroku</p>
+                      <p>[0 - {simulator.getNumberOfLastStep}]</p>
+                    </div>
+                  </CardHeader>
+                  <CardBody
+                    className={
+                      "flex flex-row justify-evenly items-center gap-lg"
+                    }
+                  >
+                    <Input
+                      type={"number"}
+                      min={0}
+                      max={simulator.getNumberOfLastStep}
+                      errorMessage={" "}
+                      onChange={(e) =>
+                        simContext.setSimStepToGo(Number(e.target.value))
+                      }
+                      className={"max-w-16 max-h-12  relative"}
+                    />
+                    <Button
+                      color={"primary"}
+                      isDisabled={
+                        simContext.simIsRunning ||
+                        (simContext.simStepToGo >
+                          simulator.getNumberOfLastStep &&
+                          simContext.simStepToGo > 0)
+                      }
+                      onPress={() =>
+                        simContext.goToStep(simContext.simStepToGo)
+                      }
+                    >
+                      Skocz
+                    </Button>
+                  </CardBody>
+                </PopoverWrapper>
+              </Card>
+            </div>
+            <div className={"flex flex-row justify-between "}>
+              <Card className={"w-1/2"}>
+                <PopoverWrapper
+                  placement={"bottom"}
+                  content={"Moduł sterowania prędkością animacji w symulacji"}
+                  isVisible={deliveredIsSecondBlurActive}
+                  ariaLabel={"anim_module"}
+                >
+                  <CardHeader>
+                    <h2>Sterowanie animacją</h2>
+                  </CardHeader>
+                  <CardBody className={"flex flex-row items-center gap-x-lg"}>
+                    <Select
+                      label="Wybierz szybkość animacji"
+                      defaultSelectedKeys={["instant"]}
+                      selectedKeys={[simContext.simAnimationType]}
+                      onChange={simContext.animationTypeChoose}
+                    >
+                      {animationList.map((animation) => (
+                        <SelectItem key={animation.key}>
+                          {animation.label}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                    <Button
+                      isDisabled={simContext.simForceStopRef.current}
+                      color={"primary"}
+                      onPress={simContext.stopAnimation}
+                    >
+                      Stop
+                      <MdStop size={iconSize} />
+                    </Button>
+                  </CardBody>
+                </PopoverWrapper>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <h2>Zrzut symulacji</h2>
+                </CardHeader>
+                <CardBody className={"flex flex-row items-center  gap-lg"}>
+                  <p>Wygeneruj plik json z listami kroków</p>
+                  <div className={"flex flex-row justify-between gap-lg"}>
+                    <PopoverWrapper
+                      placement={"top"}
+                      content={
+                        "Przycisk generujący pełny zrzut z symulacji sortowania konwertowany do pliku json"
+                      }
+                      isVisible={deliveredIsSecondBlurActive}
+                      ariaLabel={"json_download_button"}
+                    >
                       <Button
-                          color={"primary"}
-                          isDisabled={
-                              simContext.simIsRunning ||
-                              (simContext.simStepToGo > simulator.getNumberOfLastStep &&
-                                  simContext.simStepToGo > 0)
-                          }
-                          onPress={() => simContext.goToStep(simContext.simStepToGo)}
-                      >
-                        Skocz
-                      </Button>
-                    </CardBody>
-                  </Card>
-                </div>
-
-                <div className={"flex flex-row justify-between "}>
-                  <Card className={"w-1/2"}>
-                    <CardHeader>
-                      <h2>Sterowanie animacją</h2>
-                    </CardHeader>
-                    <CardBody className={"flex flex-row items-center gap-x-lg"}>
-                      <Select
-                          label="Wybierz szybkość animacji"
-                          defaultSelectedKeys={["instant"]}
-                          selectedKeys={[simContext.simAnimationType]}
-                          onChange={simContext.animationTypeChoose}
-                      >
-                        {animationList.map((animation) => (
-                            <SelectItem key={animation.key}>
-                              {animation.label}
-                            </SelectItem>
-                        ))}
-                      </Select>
-                      <Button
-                          isDisabled={simContext.simForceStopRef.current}
-                          color={"primary"}
-                          onPress={simContext.stopAnimation}
-                      >
-                        Stop
-                        <MdStop size={iconSize} />
-                      </Button>
-                    </CardBody>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <h2>Zrzut symulacji</h2>
-                    </CardHeader>
-                    <CardBody className={"flex flex-row items-center  gap-lg"}>
-                      <p>Wygeneruj plik json z listami kroków</p>
-                      <Button
-                          color={"primary"}
-                          isDisabled={simContext.simIsRunning}
-                          onPress={simContext.downloadJSONFile}
+                        color={"primary"}
+                        isDisabled={simContext.simIsRunning}
+                        onPress={simContext.downloadJSONFile}
                       >
                         Zapisz
                         <MdDownload size={iconSize} />
                       </Button>
+                    </PopoverWrapper>
 
+                    <PopoverWrapper
+                      placement={"bottom-end"}
+                      content={
+                        "Przycisk pokazujący więcej informacji na temat sortowania"
+                      }
+                      isVisible={deliveredIsSecondBlurActive}
+                      ariaLabel={"more_info_button"}
+                    >
                       <Button color={"primary"} onPress={onOpen}>
                         Info
                         <MdInfo size={iconSize} />
                       </Button>
-                    </CardBody>
-                  </Card>
-                </div>
-              </div>
+                    </PopoverWrapper>
+                  </div>
+                </CardBody>
+              </Card>
             </div>
-        ) : (
-            <div>brak zmiennej simulator</div>
-        )}
-      </div>
+          </div>
+        </div>
+      ) : (
+        <div>brak zmiennej simulator</div>
+      )}
+    </div>
   );
 }

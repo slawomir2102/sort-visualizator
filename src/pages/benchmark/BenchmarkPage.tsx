@@ -11,7 +11,7 @@ import {
 import { useCallback, useState } from "react";
 import Benchmark, { typeOperation } from "./Benchmark.tsx";
 import { Generator } from "../../logic/simulator/Generator.ts";
-import {setsNumberOfElements} from "../../logic/simulator/SimulatorTypes.ts";
+import { setsNumberOfElements } from "../../logic/simulator/SimulatorTypes.ts";
 
 const BenchmarkPage = () => {
   const [trigger, setTrigger] = useState<boolean>(false);
@@ -24,16 +24,14 @@ const BenchmarkPage = () => {
     useState<boolean>(false);
   const [dataToSort, setDataToSort] = useState<number[] | undefined>(undefined);
 
-  const [numberOfElements, setNumberOfElements] = useState<number>(4);
-  const [fromNumber, setFromNumber] = useState<number>(0);
-  const [toNumber, setToNumber] = useState<number>(0);
+  const [numberOfElements] = useState<number>(4);
+  const [fromNumber] = useState<number>(0);
+  const [toNumber] = useState<number>(0);
 
   const isValid = useCallback(() => {
     const statusValues = Object.values(childrenStatus);
 
-    return (
-      statusValues.length > 0 && statusValues.every((status) => status)
-    );
+    return statusValues.length > 0 && statusValues.every((status) => status);
   }, [childrenStatus]);
 
   const handleDataFromChild = useCallback((data: boolean, index: number) => {
@@ -134,7 +132,7 @@ const BenchmarkPage = () => {
         </CardBody>
       </Card>
       <div className={"flex flex-col gap-lg w-3/4"}>
-        <Card >
+        <Card>
           <CardHeader>
             <h2 className={"text-center w-full"}>Symulatory wydajności</h2>
           </CardHeader>
@@ -152,7 +150,7 @@ const BenchmarkPage = () => {
           </CardBody>
         </Card>
 
-        <Card >
+        <Card>
           <CardHeader>
             <h2 className={"text-center w-full"}>Sterowanie symulacją</h2>
           </CardHeader>

@@ -16,15 +16,19 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 
-import {Simulator} from "../../logic/simulator/Simulator.tsx";
+import { Simulator } from "../../logic/simulator/Simulator.tsx";
 
-import {Generator} from "../../logic/simulator/Generator.ts";
-import {MdInfo} from "react-icons/md";
+import { Generator } from "../../logic/simulator/Generator.ts";
+import { MdInfo } from "react-icons/md";
 import PopoverWrapper from "../../components/popover_wrapper/PopoverWrapper.tsx";
 import BlurOverlay from "../../components/blur_overlay/BlurOverlay.tsx";
-import {simulators, SortDirection} from "../../logic/simulator/SimulatorTypes.ts";
+import {
+  AlgorithmsNames,
+  simulators,
+  SortDirection,
+} from "../../logic/simulator/SimulatorTypes.ts";
 
 export type sortDirectionType = "ASCENDING" | "DESCENDING";
 
@@ -32,7 +36,7 @@ const VisualizerPage = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [simulate, setSimulate] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [sortType, setSortType] = useState("");
+  const [sortType, setSortType] = useState<AlgorithmsNames | "">("");
   const [isChoosedSortAlgoritm, setIsChoosedSortAlgoritm] = useState(false);
   const [numberOfElements, setNumberOfElements] = useState<number>(4);
   const [fromNumber, setFromNumber] = useState<number>(0);
@@ -41,8 +45,9 @@ const VisualizerPage = () => {
     Array<string>
   >(Array(numberOfElements).fill(""));
   const [dataToSort, setdataToSort] = useState<number[]>([]);
-  const [sortDirection, setSortDirection] =
-    useState<SortDirection>(SortDirection.ASCENDING);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(
+    SortDirection.ASCENDING,
+  );
 
   // let dataToSort: number[] = [];
   useEffect(() => {
@@ -92,11 +97,9 @@ const VisualizerPage = () => {
   const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedSimulator = e.target.value;
 
-    setSortType(selectedSimulator);
-    console.log("selectedSimulator", selectedSimulator);
+    setSortType(selectedSimulator as AlgorithmsNames);
 
     if (selectedSimulator.length <= 0) {
-      console.log("false");
       setIsChoosedSortAlgoritm(false);
       return;
     }
@@ -153,15 +156,25 @@ const VisualizerPage = () => {
 
   return (
     <div className={"flex w-full h-full flex-row justify-center gap-xl p-4"}>
-    <BlurOverlay isVisible={isBlurActive} setIsBlurActive={setIsBlurActive} />
-      <BlurOverlay isVisible={isSecondBlurActive} setIsBlurActive={setIsSecondBlurActive} />
+      <BlurOverlay
+        isVisible={isBlurActive}
+        setIsBlurActive={setIsBlurActive}
+        title={"Pomoc uruchomienia symulatora"}
+      />
+      <BlurOverlay
+        isVisible={isSecondBlurActive}
+        setIsBlurActive={setIsSecondBlurActive}
+        title={"Pomoc sterowania symulatorem"}
+      />
       <Card className={"w-1/4 relative"}>
         <Button
           onPress={() => {
             setIsBlurActive((prev) => !prev);
           }}
           color={"primary"}
-          className={" absolute top-5 right-5 z-20 flex flex-row gap-xl items-center justify-center"}
+          className={
+            " absolute top-5 right-5 z-20 flex flex-row gap-xl items-center justify-center"
+          }
         >
           Pomoc <MdInfo color={"white"} size={20} />
         </Button>
@@ -203,7 +216,13 @@ const VisualizerPage = () => {
               >
                 <p>Kierunek sortowania: </p>
 
-                <PopoverWrapper content={"Tutaj możesz ustawić kierunek sortowania, aby zmiana została zastosowana musisz kliknąć przycisk symulacji"} isVisible={isBlurActive} ariaLabel={"sort_direction_switch"}>
+                <PopoverWrapper
+                  content={
+                    "Tutaj możesz ustawić kierunek sortowania, aby zmiana została zastosowana musisz kliknąć przycisk symulacji"
+                  }
+                  isVisible={isBlurActive}
+                  ariaLabel={"sort_direction_switch"}
+                >
                   <div className={"flex flex-row-reverse items-center gap-xl"}>
                     <Switch
                       defaultSelected
@@ -216,8 +235,12 @@ const VisualizerPage = () => {
                         }
                       }}
                     />
-                    {sortDirection === SortDirection.ASCENDING ? <p>Rosnąco</p> : null}
-                    {sortDirection === SortDirection.DESCENDING ? <p>Malejąco</p> : null}
+                    {sortDirection === SortDirection.ASCENDING ? (
+                      <p>Rosnąco</p>
+                    ) : null}
+                    {sortDirection === SortDirection.DESCENDING ? (
+                      <p>Malejąco</p>
+                    ) : null}
                   </div>
                 </PopoverWrapper>
               </div>
@@ -229,7 +252,13 @@ const VisualizerPage = () => {
               <p>Dane do sortowania:</p>
 
               <div className={"flex flex-row items-center justify-end gap-lg"}>
-                <PopoverWrapper content={"Przycisk przenoszący do okienka, w którym możemy uzupełnić dane wejściowe do symulacji"} isVisible={isBlurActive} ariaLabel={"data_accept_button"}>
+                <PopoverWrapper
+                  content={
+                    "Przycisk przenoszący do okienka, w którym możemy uzupełnić dane wejściowe do symulacji"
+                  }
+                  isVisible={isBlurActive}
+                  ariaLabel={"data_accept_button"}
+                >
                   <Button onPress={onOpen}>Uzupełnij dane</Button>
                 </PopoverWrapper>
               </div>
@@ -356,11 +385,17 @@ const VisualizerPage = () => {
                 </ModalContent>
               </Modal>
             </div>
-            <PopoverWrapper content={"Przcisk startujący symulacje. Aby symulacja mogła wystartować muszą być uzupełnione dane oraz wybrany algorytm sortowania"} isVisible={isBlurActive} ariaLabel={"sim_start_button"}>
+            <PopoverWrapper
+              content={
+                "Przcisk startujący symulacje. Aby symulacja mogła wystartować muszą być uzupełnione dane oraz wybrany algorytm sortowania"
+              }
+              isVisible={isBlurActive}
+              ariaLabel={"sim_start_button"}
+            >
               <Button
-                  className={'w-full'}
-                  isDisabled={!isChoosedSortAlgoritm || !isArrayNotEmpty}
-                  onPress={handleSimulationClick}
+                className={"w-full"}
+                isDisabled={!isChoosedSortAlgoritm || !isArrayNotEmpty}
+                onPress={handleSimulationClick}
               >
                 Symuluj
               </Button>
@@ -373,32 +408,39 @@ const VisualizerPage = () => {
         <CardHeader className={"flex items-center justify-center"}>
           <h2>Symulator {sortType}</h2>
           <Button
-              onPress={() => {
-                setIsSecondBlurActive((prev) => !prev);
-              }}
-              color={"primary"}
-              className={" absolute top-5 right-5 z-30 flex flex-row gap-xl items-center justify-center"}
+            onPress={() => {
+              setIsSecondBlurActive((prev) => !prev);
+            }}
+            color={"primary"}
+            className={
+              " absolute top-5 right-5 z-30 flex flex-row gap-xl items-center justify-center"
+            }
           >
             Pomoc <MdInfo color={"white"} size={20} />
           </Button>
-
         </CardHeader>
-        <CardBody className={"w-full flex flex-row items-center overflow-hidden scrollbar-hide"}>
-          <div className={"w-full flex items-center"}>
+        <CardBody
+          className={
+            "w-full flex flex-row items-center overflow-hidden scrollbar-hide"
+          }
+        >
+          <div className={"w-full flex items-center justify-center"}>
             {!simulate && !isLoading && <div>nie wybrano typu symulatora</div>}
 
             {isLoading && <Spinner size={"lg"} />}
             {simulate && !isLoading && (
-
-                <PopoverWrapper content={"Tutaj znajduje się okno symulacji"} isVisible={isBlurActive} ariaLabel={"sim_window"}>
-                  <Simulator
-                      deliveredDataToSort={dataToSort}
-                      selectedAlgorithm={sortType}
-                      deliveredSortDirection={sortDirection}
-                      deliveredIsSecondBlurActive={isSecondBlurActive}
-                  />
-                </PopoverWrapper>
-
+              <PopoverWrapper
+                content={"Tutaj znajduje się okno symulacji"}
+                isVisible={isBlurActive}
+                ariaLabel={"sim_window"}
+              >
+                <Simulator
+                  deliveredDataToSort={dataToSort}
+                  selectedAlgorithm={sortType}
+                  deliveredSortDirection={sortDirection}
+                  deliveredIsSecondBlurActive={isSecondBlurActive}
+                />
+              </PopoverWrapper>
             )}
           </div>
         </CardBody>

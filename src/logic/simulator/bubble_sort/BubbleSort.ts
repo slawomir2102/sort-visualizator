@@ -1,9 +1,9 @@
-import {BaseSortStep, MeasureExecutionTime, Simulator} from "../Simulator.ts";
-import {SortDirection} from "../SimulatorTypes.ts";
+import { BaseSortStep, MeasureExecutionTime, Simulator } from "../Simulator.ts";
+import { SortDirection } from "../SimulatorTypes.ts";
 
 export enum BubbleSortOperation {
-  Compare = 'compare',
-  Swap = 'swap',
+  Compare = "compare",
+  Swap = "swap",
 }
 
 export type BubbleSortStep = BaseSortStep & {
@@ -42,35 +42,33 @@ export class BubbleSort extends Simulator {
       let j: number = 0;
       for (j; j < size - i - 1; j++) {
         if (
-            (this.sortDirection === SortDirection.ASCENDING && arr[j] > arr[j + 1]) ||
-            (this.sortDirection === SortDirection.DESCENDING && arr[j] < arr[j + 1])
+          (this.sortDirection === SortDirection.ASCENDING &&
+            arr[j] > arr[j + 1]) ||
+          (this.sortDirection === SortDirection.DESCENDING &&
+            arr[j] < arr[j + 1])
         ) {
-          this.registerOperation(
-              {
-                leftNumber:
-                    {index: j, value: arr[j]},
-                rightNumber:
-                    {index: j + 1, value: arr[j + 1]},
-                typeOperation: BubbleSortOperation.Swap,
-                sortedElements: {indexes : [], values: []}
-              })
+          this.registerOperation({
+            leftNumber: { index: j, value: arr[j] },
+            rightNumber: { index: j + 1, value: arr[j + 1] },
+            typeOperation: BubbleSortOperation.Swap,
+            sortedElements: { indexes: [], values: [] },
+          });
           this.swapAndCount(arr, j, j + 1);
         } else {
-          this.registerOperation(
-              {
-                leftNumber:
-                    {index: j, value: arr[j]},
-                rightNumber:
-                    {index: j + 1, value: arr[j + 1]},
-                typeOperation: BubbleSortOperation.Compare,
-                sortedElements: {indexes : [], values: []}
-              })
+          this.registerOperation({
+            leftNumber: { index: j, value: arr[j] },
+            rightNumber: { index: j + 1, value: arr[j + 1] },
+            typeOperation: BubbleSortOperation.Compare,
+            sortedElements: { indexes: [], values: [] },
+          });
         }
       }
       const lastStep: number = this.operations.length - 1;
 
       const sortedIndex: number = size - i - 1;
       sortedIndexes.push(sortedIndex);
+
+      if (this.operations[lastStep].sortedElements === undefined) return;
 
       if (lastStep >= 0 && this.operations[lastStep]) {
         this.operations[lastStep] = {
@@ -126,8 +124,10 @@ export class BubbleSort extends Simulator {
     for (let i: number = 0; i < size - 1; i++) {
       for (let j: number = 0; j < size - i - 1; j++) {
         if (
-            (this.sortDirection === SortDirection.ASCENDING && arr[j] > arr[j + 1]) ||
-            (this.sortDirection === SortDirection.DESCENDING && arr[j] < arr[j + 1])
+          (this.sortDirection === SortDirection.ASCENDING &&
+            arr[j] > arr[j + 1]) ||
+          (this.sortDirection === SortDirection.DESCENDING &&
+            arr[j] < arr[j + 1])
         ) {
           this.swap(arr, j, j + 1);
         }
@@ -145,7 +145,8 @@ export class BubbleSort extends Simulator {
     const currentOperation: BubbleSortStep = this.operations[this.currentStep];
     if (!currentOperation) return "Błąd: brak operacji dla tego kroku.";
 
-    const { leftNumber, rightNumber, typeOperation, sortedElements } = currentOperation;
+    const { leftNumber, rightNumber, typeOperation, sortedElements } =
+      currentOperation;
 
     if (!leftNumber || !rightNumber) {
       return "Błąd: nieprawidłowe dane operacji sortowania.";
@@ -160,19 +161,23 @@ export class BubbleSort extends Simulator {
 
     const compareText = `${leftValue} została porównana z ${rightValue}`;
     let compareTextResult =
-        leftValue === rightValue
-            ? ", liczby są równe, więc nie zostały zamienione."
-            : leftValue > rightValue
-                ? `, ${leftValue} jest większa.`
-                : `, ${leftValue} jest mniejsza.`;
+      leftValue === rightValue
+        ? ", liczby są równe, więc nie zostały zamienione."
+        : leftValue > rightValue
+          ? `, ${leftValue} jest większa.`
+          : `, ${leftValue} jest mniejsza.`;
 
     if (typeOperation === BubbleSortOperation.Swap) {
       compareTextResult += ` Została zamieniona miejscami z ${rightValue}.`;
     }
 
     let sortedText = "";
-    if (sortedElements && sortedElements.indexes && sortedElements.indexes.length > 0) {
-      sortedText = ` Posortowane elementy: ${sortedElements.indexes.join(', ')}.`;
+    if (
+      sortedElements &&
+      sortedElements.indexes &&
+      sortedElements.indexes.length > 0
+    ) {
+      sortedText = ` Posortowane elementy: ${sortedElements.indexes.join(", ")}.`;
     }
 
     return `${compareText}${compareTextResult}${sortedText}`.trim();
@@ -185,9 +190,7 @@ export class BubbleSort extends Simulator {
       return JSON.stringify({ error: "Brak danych do wygenerowania JSON." });
     }
 
-    const steps: object[] = [
-      { algorithms_name: this.sortName }
-    ];
+    const steps: object[] = [{ algorithms_name: this.sortName }];
 
     // Zapisz aktualny stan
     const currentArrayCopy = [...this.currentArray];
@@ -200,7 +203,7 @@ export class BubbleSort extends Simulator {
       steps.push({
         current_array: [...this.currentArray],
         current_step: this.currentStep,
-        description: this.generateCurrentStepDescription()
+        description: this.generateCurrentStepDescription(),
       });
       this.nextStep();
     }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Generator } from "../../logic/simulator/Generator.ts";
 import { Select, SelectItem, Spinner } from "@nextui-org/react";
 import { setsNumberOfElements } from "../../logic/simulator/SimulatorTypes.ts";
-import {simulators} from "../../logic/simulator/SimulatorTypes.ts";
+import { simulators } from "../../logic/simulator/SimulatorTypes.ts";
 
 export type typeOperation = "start" | "stop" | null;
 
@@ -71,7 +71,7 @@ const Benchmark = (props: Props) => {
 
     if (sortAlg && numberOfElements) {
       const newWorker = new Worker(
-        new URL("../../logic/simulator_new/SortWorker.ts", import.meta.url),
+        new URL("../../logic/simulator/SortWorker.ts", import.meta.url),
         {
           type: "module",
         },

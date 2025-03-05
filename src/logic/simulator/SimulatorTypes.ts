@@ -1,7 +1,7 @@
-import {BubbleSort} from "./bubble_sort/BubbleSort.ts";
-import {QuickSort} from "./quick_sort/QuickSort.ts";
-import {InsertionSort} from "./insertion_sort/InsertionSort.ts";
-import {SelectionSort} from "./selection_sort/SelectionSort.ts";
+import { BubbleSort } from "./bubble_sort/BubbleSort.ts";
+import { QuickSort } from "./quick_sort/QuickSort.ts";
+import { InsertionSort } from "./insertion_sort/InsertionSort.ts";
+import { SelectionSort } from "./selection_sort/SelectionSort.ts";
 
 export enum SimulatorState {
   Initial = 0,
@@ -13,8 +13,6 @@ export type SimulatorStateType =
   | SimulatorState.Initial
   | SimulatorState.DuringSorting
   | SimulatorState.Sorted;
-
-
 
 export enum SimDirection {
   Forward = 0,
@@ -49,21 +47,27 @@ export type SimAnimationSpeedType =
   | SimAnimationSpeed.Slow
   | SimAnimationSpeed.VerySlow;
 
-
 export enum SortDirection {
   ASCENDING = 0,
   DESCENDING = 1,
 }
 
 export type sortDirectionType =
-  SortDirection.ASCENDING
+  | SortDirection.ASCENDING
   | SortDirection.DESCENDING;
 
+export enum AlgorithmsNames {
+  BubbleSort = "bubbleSort",
+  QuickSort = "quickSort",
+  InsertionSort = "insertionSort",
+  SelectionSort = "selectionSort",
+}
+
 export const simulators = [
-  { key: "bubbleSort", label: "Bubble Sort" },
-  { key: "quickSort", label: "Quick Sort" },
-  { key: "insertionSort", label: "Insertion Sort" },
-  { key: "selectionSort", label: "Selection Sort" },
+  { key: AlgorithmsNames.BubbleSort, label: "Bubble Sort" },
+  { key: AlgorithmsNames.QuickSort, label: "Quick Sort" },
+  { key: AlgorithmsNames.InsertionSort, label: "Insertion Sort" },
+  { key: AlgorithmsNames.SelectionSort, label: "Selection Sort" },
 ];
 
 export const setsNumberOfElements = [
@@ -74,4 +78,9 @@ export const setsNumberOfElements = [
   { key: 200000, label: "200000" },
 ];
 
-export type Simulators = BubbleSort | QuickSort | InsertionSort | SelectionSort | null;
+export type Simulators =
+  | BubbleSort
+  | QuickSort
+  | InsertionSort
+  | SelectionSort
+  | null;
