@@ -33,6 +33,8 @@ export class BubbleSort extends Simulator {
 
   @MeasureExecutionTime
   public generateSimulatorSteps(): void {
+    this.swapsCounter = 0;
+    this.compareCounter = 0;
     const arr: number[] = [...this.originalArray];
     const size: number = arr.length;
 
@@ -41,6 +43,7 @@ export class BubbleSort extends Simulator {
     for (let i: number = 0; i < size - 1; i++) {
       let j: number = 0;
       for (j; j < size - i - 1; j++) {
+        this.compareCounter++;
         if (
           (this.sortDirection === SortDirection.ASCENDING &&
             arr[j] > arr[j + 1]) ||
@@ -53,7 +56,8 @@ export class BubbleSort extends Simulator {
             typeOperation: BubbleSortOperation.Swap,
             sortedElements: { indexes: [], values: [] },
           });
-          this.swapAndCount(arr, j, j + 1);
+          this.swap(arr, j, j + 1);
+          this.swapsCounter++;
         } else {
           this.registerOperation({
             leftNumber: { index: j, value: arr[j] },
@@ -118,11 +122,14 @@ export class BubbleSort extends Simulator {
 
   @MeasureExecutionTime
   public sort(): number[] {
+    this.swapsCounter = 0;
+    this.compareCounter = 0;
     const arr: number[] = [...this.originalArray];
     const size: number = arr.length;
 
     for (let i: number = 0; i < size - 1; i++) {
       for (let j: number = 0; j < size - i - 1; j++) {
+        this.compareCounter++;
         if (
           (this.sortDirection === SortDirection.ASCENDING &&
             arr[j] > arr[j + 1]) ||
@@ -130,6 +137,7 @@ export class BubbleSort extends Simulator {
             arr[j] < arr[j + 1])
         ) {
           this.swap(arr, j, j + 1);
+          this.swapsCounter++;
         }
       }
     }

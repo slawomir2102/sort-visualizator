@@ -30,11 +30,13 @@ self.onmessage = function (e) {
 
     simulator.sort();
     const time = simulator.getExecutionTimeFor("sort", 6, "s");
-    const numberOfSwaps: number = 0;
+    const numberOfSwaps: number = simulator.getNumberOfSwaps;
+    const numberOfCompare: number = simulator.getNumberOfCompare;
     self.postMessage({
       result: {
         execTime: time,
         swaps: numberOfSwaps,
+        compares: numberOfCompare,
       },
       error: null,
     });

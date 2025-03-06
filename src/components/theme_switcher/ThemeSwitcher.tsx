@@ -18,6 +18,7 @@ export default function ThemeSwitcher() {
   return (
     <div>
       <Switch
+        className={"px-4"}
         checked={currentTheme === "dark"}
         onChange={changeTheme}
         size="lg"

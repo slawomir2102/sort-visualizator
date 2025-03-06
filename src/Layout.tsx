@@ -6,7 +6,7 @@ const Layout = () => {
     <div className={"flex flex-col items-center justify-center"}>
       <Navigation />
 
-      <main className={"flex items-center justify-center w-full h-[85svh]"}>
+      <main className={"flex items-center justify-center w-full "}>
         <Outlet />
       </main>
     </div>

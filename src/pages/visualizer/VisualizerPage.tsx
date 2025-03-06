@@ -155,7 +155,9 @@ const VisualizerPage = () => {
   const [isSecondBlurActive, setIsSecondBlurActive] = useState(false);
 
   return (
-    <div className={"flex w-full h-full flex-row justify-center gap-xl p-4"}>
+    <div
+      className={"flex w-full  flex-row justify-center gap-xl p-4 h-[85svh]"}
+    >
       <BlurOverlay
         isVisible={isBlurActive}
         setIsBlurActive={setIsBlurActive}

@@ -1,5 +1,5 @@
-import {BaseSortStep, MeasureExecutionTime, Simulator} from "../Simulator.ts";
-import {SortDirection} from "../SimulatorTypes.ts";
+import { BaseSortStep, MeasureExecutionTime, Simulator } from "../Simulator.ts";
+import { SortDirection } from "../SimulatorTypes.ts";
 
 export enum InsertionSortOperation {
   Compare = "compare",
@@ -36,6 +36,8 @@ export class InsertionSort extends Simulator {
   }
 
   public generateSimulatorSteps(): void {
+    this.swapsCounter = 0;
+    this.compareCounter = 0;
     const arr: number[] = [...this.originalArray];
     const size: number = arr.length;
     const sortedIndexes: number[] = [0];
@@ -47,31 +49,47 @@ export class InsertionSort extends Simulator {
 
       // Register key selection operation
       this.registerOperation({
-        key: {index: i, value: key},
+        key: { index: i, value: key },
         typeOperation: InsertionSortOperation.KeySelection, // Fixed: using SortOperation enum
-        sortedElements: {indexes: [...sortedIndexes], values: sortedIndexes.map(idx => arr[idx])}
+        sortedElements: {
+          indexes: [...sortedIndexes],
+          values: sortedIndexes.map((idx) => arr[idx]),
+        },
       });
 
-      while (j >= 0 && (this.sortDirection === SortDirection.ASCENDING ? arr[j] > key : arr[j] < key)) {
+      while (
+        j >= 0 &&
+        (this.sortDirection === SortDirection.ASCENDING
+          ? arr[j] > key
+          : arr[j] < key)
+      ) {
         // Register comparison operation
         this.registerOperation({
-          key: {index: i, value: key},
-          comparedElement: {index: j, value: arr[j]},
+          key: { index: i, value: key },
+          comparedElement: { index: j, value: arr[j] },
           typeOperation: InsertionSortOperation.Compare, // Fixed: using SortOperation enum
-          sortedElements: {indexes: [...sortedIndexes], values: sortedIndexes.map(idx => arr[idx])}
+          sortedElements: {
+            indexes: [...sortedIndexes],
+            values: sortedIndexes.map((idx) => arr[idx]),
+          },
         });
+        this.compareCounter++;
 
         // Shift element to the right
         arr[j + 1] = arr[j];
 
         // Register shift operation
         this.registerOperation({
-          key: {index: i, value: key},
-          shiftedElement: {index: j, value: arr[j]}, // Fixed: singular not plural
+          key: { index: i, value: key },
+          shiftedElement: { index: j, value: arr[j] }, // Fixed: singular not plural
           newPosition: j + 1,
           typeOperation: InsertionSortOperation.Shift, // Fixed: using SortOperation enum
-          sortedElements: {indexes: [...sortedIndexes], values: sortedIndexes.map(idx => arr[idx])}
+          sortedElements: {
+            indexes: [...sortedIndexes],
+            values: sortedIndexes.map((idx) => arr[idx]),
+          },
         });
+        this.swapsCounter++;
 
         insertedPosition = j;
         j--;
@@ -86,11 +104,15 @@ export class InsertionSort extends Simulator {
 
         // Register insert operation
         this.registerOperation({
-          key: {index: i, value: key},
+          key: { index: i, value: key },
           insertedPosition: insertedPosition, // Fixed: using insertedPosition instead of newPosition
           typeOperation: InsertionSortOperation.Insert, // Fixed: using SortOperation enum
-          sortedElements: {indexes: [...sortedIndexes], values: sortedIndexes.map(idx => arr[idx])}
+          sortedElements: {
+            indexes: [...sortedIndexes],
+            values: sortedIndexes.map((idx) => arr[idx]),
+          },
         });
+        this.swapsCounter++;
       } else {
         // If no insertion needed, add current index to sortedIndexes
         sortedIndexes.push(i);
@@ -100,7 +122,7 @@ export class InsertionSort extends Simulator {
         if (lastIndex >= 0) {
           this.operations[lastIndex].sortedElements = {
             indexes: [...sortedIndexes],
-            values: sortedIndexes.map(idx => arr[idx])
+            values: sortedIndexes.map((idx) => arr[idx]),
           };
         }
       }
@@ -121,7 +143,7 @@ export class InsertionSort extends Simulator {
 
     switch (operation.typeOperation) {
       case InsertionSortOperation.Shift: {
-        const { shiftedElement, newPosition, } = operation;
+        const { shiftedElement, newPosition } = operation;
         if (shiftedElement && newPosition !== undefined) {
           this.currentArray[newPosition] = shiftedElement.value; // Użyj .value lub .index w zależności od logiki
         }
@@ -134,7 +156,7 @@ export class InsertionSort extends Simulator {
         }
         break;
       }
-        // Case'y Compare i KeySelection mogą nie wpływać na tablicę
+      // Case'y Compare i KeySelection mogą nie wpływać na tablicę
     }
 
     return this.currentArray;
@@ -142,6 +164,8 @@ export class InsertionSort extends Simulator {
 
   @MeasureExecutionTime
   public sort(): number[] {
+    this.swapsCounter = 0;
+    this.compareCounter = 0;
     const arr: number[] = [...this.originalArray];
     const size: number = arr.length;
 
@@ -150,12 +174,20 @@ export class InsertionSort extends Simulator {
       let j = i - 1;
 
       // Fixed sorting logic with proper direction handling
-      while (j >= 0 && (this.sortDirection === SortDirection.ASCENDING ? arr[j] > key : arr[j] < key)) {
+      while (
+        j >= 0 &&
+        (this.sortDirection === SortDirection.ASCENDING
+          ? arr[j] > key
+          : arr[j] < key)
+      ) {
+        this.compareCounter++;
         arr[j + 1] = arr[j];
+        this.swapsCounter++;
         j--;
       }
 
       arr[j + 1] = key;
+      this.swapsCounter++;
     }
 
     return arr;
@@ -195,11 +227,12 @@ export class InsertionSort extends Simulator {
         if (comparedElement) {
           const comparedValue = comparedElement.value;
           description = `Klucz ${keyValue} został porównany z ${comparedValue}. `;
-          description += keyValue < comparedValue
+          description +=
+            keyValue < comparedValue
               ? `${keyValue} jest mniejszy. `
               : keyValue > comparedValue
-                  ? `${keyValue} jest większy. `
-                  : "Liczby są równe. ";
+                ? `${keyValue} jest większy. `
+                : "Liczby są równe. ";
         }
         break;
 
@@ -217,15 +250,19 @@ export class InsertionSort extends Simulator {
     }
 
     // Add information about sorted elements
-    if (sortedElements && sortedElements.indexes && sortedElements.indexes.length > 0) {
-      description += ` Posortowane elementy: ${sortedElements.indexes.join(', ')}.`;
+    if (
+      sortedElements &&
+      sortedElements.indexes &&
+      sortedElements.indexes.length > 0
+    ) {
+      description += ` Posortowane elementy: ${sortedElements.indexes.join(", ")}.`;
     }
 
     return description.trim() || "Brak dostępnego opisu kroku.";
   }
 
   public generateJSONFile = (): string => {
-    console.log(this.operations)
+    console.log(this.operations);
 
     if (this.operations.length === 0) {
       console.error("Tablica jest pusta");
@@ -234,23 +271,16 @@ export class InsertionSort extends Simulator {
 
     const size = this.operations.length;
 
-
-    const steps: object[] = [
-      {algorithms_name: this.sortName,}
-    ]
-
+    const steps: object[] = [{ algorithms_name: this.sortName }];
 
     for (let i: number = 0; i < size; i++) {
-
       steps.push({
         current_array: this.currentArray,
         current_step: this.currentStep,
-      })
+      });
       this.nextStep();
     }
 
     return JSON.stringify(steps, null, 2);
-  }
-
-
+  };
 }

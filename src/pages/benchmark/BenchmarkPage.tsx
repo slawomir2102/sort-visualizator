@@ -8,7 +8,7 @@ import {
   SelectItem,
   Switch,
 } from "@nextui-org/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Benchmark, { typeOperation } from "./Benchmark.tsx";
 import { Generator } from "../../logic/simulator/Generator.ts";
 import { setsNumberOfElements } from "../../logic/simulator/SimulatorTypes.ts";
@@ -23,14 +23,14 @@ const BenchmarkPage = () => {
   const [dataHaveToBeTheSame, setDataHaveToBeTheSame] =
     useState<boolean>(false);
   const [dataToSort, setDataToSort] = useState<number[] | undefined>(undefined);
+  const [dataGenerated, setDataGenerated] = useState<boolean>(false);
 
-  const [numberOfElements] = useState<number>(4);
-  const [fromNumber] = useState<number>(0);
-  const [toNumber] = useState<number>(0);
+  const [numberOfElements, setNumberOfElements] = useState<string>("1000");
+  const [fromNumber, setFromNumber] = useState<number>(0);
+  const [toNumber, setToNumber] = useState<number>(10000);
 
   const isValid = useCallback(() => {
     const statusValues = Object.values(childrenStatus);
-
     return statusValues.length > 0 && statusValues.every((status) => status);
   }, [childrenStatus]);
 
@@ -41,6 +41,12 @@ const BenchmarkPage = () => {
     }));
   }, []);
 
+  // Clear generated data when dataHaveToBeTheSame changes
+  useEffect(() => {
+    setDataToSort(undefined);
+    setDataGenerated(false);
+  }, [dataHaveToBeTheSame]);
+
   const benchmarks = [
     { id: 1, label: "BenchmarkPage 1" },
     { id: 2, label: "BenchmarkPage 2" },
@@ -48,18 +54,79 @@ const BenchmarkPage = () => {
   ];
 
   const handleGenerateData = () => {
-    const generator: Generator = new Generator();
-    const arr = generator.generateArrayOfRandomData(
-      numberOfElements,
-      fromNumber,
-      toNumber,
-    );
-    setDataToSort(arr);
+    try {
+      const generator: Generator = new Generator();
+      // Correct parameter order: min, max, count
+      const numElements = parseInt(numberOfElements);
+      if (isNaN(numElements) || numElements <= 0) {
+        console.error("Invalid number of elements");
+        return;
+      }
+
+      if (fromNumber >= toNumber) {
+        console.error("From number must be less than to number");
+        return;
+      }
+
+      const arr = generator.generateArrayOfRandomData(
+        fromNumber,
+        toNumber,
+        numElements,
+      );
+
+      setDataToSort(arr);
+      setDataGenerated(true);
+    } catch (error) {
+      console.error("Error generating data:", error);
+      setDataGenerated(false);
+    }
+  };
+
+  const handleNumberOfElementsChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setNumberOfElements(e.target.value);
+    setDataGenerated(false);
+    setDataToSort(undefined);
+  };
+
+  const handleFromNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value)) {
+      setFromNumber(value);
+      setDataGenerated(false);
+      setDataToSort(undefined);
+    }
+  };
+
+  const handleToNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value)) {
+      setToNumber(value);
+      setDataGenerated(false);
+      setDataToSort(undefined);
+    }
+  };
+
+  const handleDataHaveToBeTheSameChange = () => {
+    setDataHaveToBeTheSame((prev) => !prev);
+  };
+
+  const isSimulateDisabled = () => {
+    if (dataHaveToBeTheSame) {
+      // If data should be the same, we need both valid configuration and generated data
+      return !isValid() || !dataGenerated || dataToSort === undefined;
+    } else {
+      // If data can be different, we just need valid configuration
+      return !isValid();
+    }
   };
 
   return (
-    <div className={"flex flex-row justify-between  gap-lg p-4 w-full"}>
-      <Card className={" w-1/4"}>
+    <div
+      className={"flex flex-row justify-between gap-lg p-4 w-full h-[85svh]"}
+    >
+      <Card className={" w-1/4 h-full"}>
         <CardHeader>
           <h2 className={"w-full text-center"}>Generator danych</h2>
         </CardHeader>
@@ -68,12 +135,8 @@ const BenchmarkPage = () => {
             <div className={"flex flex-row justify-between"}>
               <p>Takie same dane </p>
               <Switch
-                onChange={() =>
-                  setDataHaveToBeTheSame((prev) => {
-                    console.log(!prev);
-                    return !prev;
-                  })
-                }
+                isSelected={dataHaveToBeTheSame}
+                onChange={handleDataHaveToBeTheSameChange}
                 aria-label={
                   "Czy dane mają być takie same dla każdego algorytmu"
                 }
@@ -86,6 +149,8 @@ const BenchmarkPage = () => {
                 isDisabled={!dataHaveToBeTheSame}
                 aria-label={"Liczba elementów"}
                 className={"w-1/2"}
+                selectedKeys={[numberOfElements]}
+                onChange={handleNumberOfElementsChange}
               >
                 {setsNumberOfElements.map((number) => (
                   <SelectItem key={number.key}>{number.label}</SelectItem>
@@ -102,6 +167,8 @@ const BenchmarkPage = () => {
                 isDisabled={!dataHaveToBeTheSame}
                 aria-label={"Zakres dolny"}
                 className={"w-1/2"}
+                value={fromNumber.toString()}
+                onChange={handleFromNumberChange}
               />
             </div>
 
@@ -114,6 +181,8 @@ const BenchmarkPage = () => {
                 isDisabled={!dataHaveToBeTheSame}
                 aria-label={"Zakres górny"}
                 className={"w-1/2"}
+                value={toNumber.toString()}
+                onChange={handleToNumberChange}
               />
             </div>
           </div>
@@ -124,19 +193,23 @@ const BenchmarkPage = () => {
             }
           >
             <div className={"flex flex-row gap-lg"}>
-              <Button color={"primary"} onPress={handleGenerateData}>
+              <Button
+                color={"primary"}
+                onPress={handleGenerateData}
+                isDisabled={!dataHaveToBeTheSame}
+              >
                 Wygeneruj dane
               </Button>
             </div>
           </div>
         </CardBody>
       </Card>
-      <div className={"flex flex-col gap-lg w-3/4"}>
-        <Card>
+      <div className={"flex flex-col gap-lg w-3/4 "}>
+        <Card className={"h-full"}>
           <CardHeader>
             <h2 className={"text-center w-full"}>Symulatory wydajności</h2>
           </CardHeader>
-          <CardBody className={"flex flex-row justify-around"}>
+          <CardBody className={"flex flex-row justify-around items-center"}>
             {benchmarks.map((benchmark, index) => (
               <Benchmark
                 key={benchmark.id}
@@ -155,7 +228,11 @@ const BenchmarkPage = () => {
             <h2 className={"text-center w-full"}>Sterowanie symulacją</h2>
           </CardHeader>
           <CardBody>
-            <div className={"flex flex-row justify-end gap-lg p-4"}>
+            <div
+              className={
+                "flex flex-row justify-end gap-lg scrollbar-hide overflow-hidden"
+              }
+            >
               <Button
                 onPress={() => {
                   setTrigger((trigger) => !trigger);
@@ -172,7 +249,7 @@ const BenchmarkPage = () => {
                   setTrigger((trigger) => !trigger);
                   setOperation("start");
                 }}
-                isDisabled={!isValid()}
+                isDisabled={isSimulateDisabled()}
                 color={"primary"}
               >
                 Symuluj

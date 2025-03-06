@@ -1,10 +1,4 @@
-import {
-
-  SortDirection,
-  sortDirectionType,
-
-} from "./SimulatorTypes.ts";
-
+import { SortDirection, sortDirectionType } from "./SimulatorTypes.ts";
 
 export function MeasureExecutionTime(
   _target: object,
@@ -48,8 +42,7 @@ export abstract class Simulator {
   protected currentStep: number;
   protected numberOfLastStep: number;
   protected swapsCounter: number;
-
-  protected abstract operations: BaseSortStep[];
+  protected compareCounter: number;
 
   protected constructor() {
     this.originalArray = [];
@@ -58,6 +51,7 @@ export abstract class Simulator {
     this.currentStep = 0;
     this.numberOfLastStep = 0;
     this.swapsCounter = 0;
+    this.compareCounter = 0;
     this.sortDirection = SortDirection.ASCENDING;
   }
 
@@ -86,21 +80,25 @@ export abstract class Simulator {
     return this.currentStep;
   }
 
-  public get getSwaps(): number {
+  public get getNumberOfSwaps(): number {
     return this.swapsCounter;
+  }
+
+  public get getNumberOfCompare(): number {
+    return this.compareCounter;
   }
 
   public get getSortDirection(): SortDirection {
     return this.sortDirection;
   }
 
-  public setSortDirection(value: SortDirection) {this.sortDirection = value;}
+  public setSortDirection(value: SortDirection) {
+    this.sortDirection = value;
+  }
 
   public get getNumberOfLastStep(): number {
     return this.numberOfLastStep;
   }
-
-
 
   public nextStep() {
     if (this.currentStep > this.numberOfLastStep - 1) {
@@ -196,11 +194,12 @@ export abstract class Simulator {
     const temp: number = arr[a];
     arr[a] = arr[b];
     arr[b] = temp;
+    this.swapsCounter++;
   };
 
   public getExecutionTimeFor(
     methodName: string,
-    precision: number = 2,
+    precision: number,
     unit?: string,
   ): number | undefined {
     let unitDivider;
@@ -216,8 +215,9 @@ export abstract class Simulator {
         break;
     }
 
-    return (
-      +this.executionTimes[methodName].toPrecision(precision) / unitDivider
-    );
+    let execTime: number = +this.executionTimes[methodName] / unitDivider;
+    execTime = +execTime.toPrecision(precision | 2);
+
+    return execTime;
   }
 }

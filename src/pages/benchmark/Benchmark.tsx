@@ -19,14 +19,27 @@ const Benchmark = (props: Props) => {
   const [algLoading, setAlgLoading] = useState<boolean>(false);
   const [numberOfElements, setNumberOfElements] = useState<string | null>(null);
   const [firstResultData, setFirstResultData] = useState<number | null>(null);
+  const [numberOfSwaps, setNumberOfSwaps] = useState<number | null>(null);
+  const [numberOfCompare, setNumberOfCompare] = useState<number | null>(null);
   const [worker, setWorker] = useState<Worker | null>(null);
   const [, setIsDataDelivered] = useState<boolean>(false);
+  const [generatedData, setGeneratedData] = useState<number[] | null>(null);
 
   useEffect(() => {
-    if (props.dataHaveToBeTheSame) {
+    // Only set isDataDelivered to true if dataHaveToBeTheSame is true AND data exists
+    if (props.dataHaveToBeTheSame && props.data && props.data.length > 0) {
       setIsDataDelivered(true);
+      // Update numberOfElements based on the provided data length
+      const matchingNumberOfElements = setsNumberOfElements.find(
+        (item) => Number(item.key) === props.data?.length,
+      );
+      if (matchingNumberOfElements) {
+        setNumberOfElements(matchingNumberOfElements.key.toString());
+      }
+    } else {
+      setIsDataDelivered(false);
     }
-  }, [props.data]);
+  }, [props.dataHaveToBeTheSame, props.data]);
 
   useEffect(() => {
     const isValidConfig = Boolean(sortAlg && numberOfElements);
@@ -49,52 +62,73 @@ const Benchmark = (props: Props) => {
 
   const handleSelectionSortAlg = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const updatedValue = e.target.value;
-
     setSortAlg(updatedValue);
   };
 
   const handleBenchmarkStart = () => {
-    // WebWorker dla pierwszego algorytmu
-    const generator = new Generator();
-    if (!numberOfElements) {
+    if (!sortAlg || !numberOfElements) {
       return;
     }
+
     const numOfElements: number = Number(numberOfElements);
+    let arr: number[] | undefined;
 
-    let arr: number[] | undefined = [];
-
+    // Handle data generation logic
     if (props.dataHaveToBeTheSame) {
-      arr = props.data;
+      // Use provided data if it exists and has the correct length
+      if (props.data && props.data.length === numOfElements) {
+        arr = props.data;
+      } else {
+        console.error(
+          "Data inconsistency: expected data not provided or incorrect length",
+        );
+        return;
+      }
     } else {
-      arr = generator.generateArrayOfRandomData(0, 150, numOfElements);
+      // Generate data if we don't already have generated data of the correct length
+      if (!generatedData || generatedData.length !== numOfElements) {
+        const generator = new Generator();
+        const newData = generator.generateArrayOfRandomData(
+          0,
+          10000,
+          numOfElements,
+        );
+        setGeneratedData(newData);
+        arr = newData;
+      } else {
+        // Reuse previously generated data of the same length
+        arr = generatedData;
+      }
     }
 
-    if (sortAlg && numberOfElements) {
-      const newWorker = new Worker(
-        new URL("../../logic/simulator/SortWorker.ts", import.meta.url),
-        {
-          type: "module",
-        },
-      );
+    const newWorker = new Worker(
+      new URL("../../logic/simulator/SortWorker.ts", import.meta.url),
+      {
+        type: "module",
+      },
+    );
 
-      setAlgLoading(true);
-      newWorker.postMessage({
-        algorithm: sortAlg,
-        dataToSort: arr,
-      });
+    setAlgLoading(true);
+    newWorker.postMessage({
+      algorithm: sortAlg,
+      dataToSort: arr,
+    });
 
-      newWorker.onmessage = (e) => {
-        const { result, error } = e.data;
-        if (!error) {
-          setFirstResultData(result.execTime);
-        } else {
-          setFirstResultData(error.toString());
-        }
-        newWorker.terminate();
-        setAlgLoading(false);
-      };
-      setWorker(newWorker);
-    }
+    newWorker.onmessage = (e) => {
+      const { result, error } = e.data;
+      if (!error) {
+        setFirstResultData(result.execTime);
+        setNumberOfSwaps(result.swaps);
+        setNumberOfCompare(result.compares);
+      } else {
+        setFirstResultData(error.toString());
+        setNumberOfSwaps(error.toString());
+        setNumberOfCompare(error.toString());
+      }
+      newWorker.terminate();
+      setAlgLoading(false);
+    };
+    setWorker(newWorker);
   };
 
   const handleSelectionNumberOfElements = (
@@ -102,6 +136,8 @@ const Benchmark = (props: Props) => {
   ) => {
     const updatedValue = e.target.value;
     setNumberOfElements(updatedValue);
+    // Clear generated data when number of elements changes
+    setGeneratedData(null);
   };
 
   function handleStopWorker(): void {
@@ -156,23 +192,23 @@ const Benchmark = (props: Props) => {
               <div className={"flex flex-col py-4 gap-sm"}>
                 <div className={"flex flex-row justify-between"}>
                   <p>Czas trwania symulacji:</p>
-                  <p> {firstResultData} s</p>
+                  {firstResultData
+                    ? firstResultData.toString() + " s"
+                    : "brak danych"}
                 </div>
                 <div className={"flex flex-row justify-between"}>
-                  <p>Całkowita ilość kroków:</p>
-                  <p>zmienna </p>
+                  <p>Ilość porównań:</p>
+                  {numberOfCompare ? numberOfCompare.toString() : "brak danych"}
                 </div>
                 <div className={"flex flex-row justify-between"}>
                   <p>Ilość zamian:</p>
-                  <p>zmienna </p>
-                </div>
-                <div className={"flex flex-row justify-between"}>
-                  <p>Ilość kroków bez zamian:</p>
-                  <p>zmienna </p>
+                  {numberOfSwaps ? numberOfSwaps.toString() : "brak danych"}
                 </div>
               </div>
             ) : (
-              <div className={"flex flex-row items-center gap-lg"}>
+              <div
+                className={"flex flex-row items-center justify-center gap-lg"}
+              >
                 <p>Symulowanie...</p>
                 <Spinner />
               </div>
