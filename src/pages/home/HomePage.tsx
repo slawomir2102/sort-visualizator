@@ -76,10 +76,10 @@ const HomePage = () => {
                 </Button>
               </div>
             </div>
-            <div className="flex-1 flex justify-center items-end">
-              <div className="w-full max-w-md rounded-lg overflow-hidden shadow-lg">
+            <div className="flex-1 flex justify-center items-center bg-">
+              <div className="w-full max-w-md rounded-lg overflow-hidden shadow-lg ">
                 <Image
-                  src="../../../public/placeholder.png"
+                  src="/placeholder.png"
                   alt="Wizualizacja sortowania"
                   className="object-cover w-full"
                 />

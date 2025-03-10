@@ -207,9 +207,10 @@ const BenchmarkPage = () => {
       <div className={"flex flex-col gap-lg w-3/4 "}>
         <Card className={"h-full"}>
           <CardHeader>
-            <h2 className={"text-center w-full"}>Symulatory wydajności</h2>
+            <h2 className={"text-center w-full"}>Tester wydajności algorytmów</h2>
           </CardHeader>
-          <CardBody className={"flex flex-row justify-around items-center"}>
+          <CardBody className={"flex flex-col"}>
+            <div className={"flex flex-row justify-between items-center"}>
             {benchmarks.map((benchmark, index) => (
               <Benchmark
                 key={benchmark.id}
@@ -220,43 +221,73 @@ const BenchmarkPage = () => {
                 sendDataToParent={(data) => handleDataFromChild(data, index)}
               />
             ))}
-          </CardBody>
-        </Card>
+            </div>
 
-        <Card>
-          <CardHeader>
-            <h2 className={"text-center w-full"}>Sterowanie symulacją</h2>
-          </CardHeader>
-          <CardBody>
             <div
-              className={
-                "flex flex-row justify-end gap-lg scrollbar-hide overflow-hidden"
-              }
+                className={
+                  "flex flex-row justify-end items-center gap-xl mt-auto p-4"
+                }
             >
+              <h2 className={'mr-auto'}>Sterowanie testerem</h2>
               <Button
-                onPress={() => {
-                  setTrigger((trigger) => !trigger);
-                  setOperation("stop");
-                }}
-                isDisabled={!isValid()}
-                color={"danger"}
+                  onPress={() => {
+                    setTrigger((trigger) => !trigger);
+                    setOperation("stop");
+                  }}
+                  isDisabled={!isValid()}
+                  color={"danger"}
               >
                 Zatrzymaj Symulacje
               </Button>
 
               <Button
-                onPress={() => {
-                  setTrigger((trigger) => !trigger);
-                  setOperation("start");
-                }}
-                isDisabled={isSimulateDisabled()}
-                color={"primary"}
+                  onPress={() => {
+                    setTrigger((trigger) => !trigger);
+                    setOperation("start");
+                  }}
+                  isDisabled={isSimulateDisabled()}
+                  color={"primary"}
               >
                 Symuluj
               </Button>
             </div>
           </CardBody>
         </Card>
+
+        {/*<Card>*/}
+        {/*  <CardHeader>*/}
+        {/*    <h2 className={"text-center w-full"}>Sterowanie symulacją</h2>*/}
+        {/*  </CardHeader>*/}
+        {/*  <CardBody>*/}
+        {/*    <div*/}
+        {/*      className={*/}
+        {/*        "flex flex-row justify-end gap-lg scrollbar-hide overflow-hidden"*/}
+        {/*      }*/}
+        {/*    >*/}
+        {/*      <Button*/}
+        {/*        onPress={() => {*/}
+        {/*          setTrigger((trigger) => !trigger);*/}
+        {/*          setOperation("stop");*/}
+        {/*        }}*/}
+        {/*        isDisabled={!isValid()}*/}
+        {/*        color={"danger"}*/}
+        {/*      >*/}
+        {/*        Zatrzymaj Symulacje*/}
+        {/*      </Button>*/}
+
+        {/*      <Button*/}
+        {/*        onPress={() => {*/}
+        {/*          setTrigger((trigger) => !trigger);*/}
+        {/*          setOperation("start");*/}
+        {/*        }}*/}
+        {/*        isDisabled={isSimulateDisabled()}*/}
+        {/*        color={"primary"}*/}
+        {/*      >*/}
+        {/*        Symuluj*/}
+        {/*      </Button>*/}
+        {/*    </div>*/}
+        {/*  </CardBody>*/}
+        {/*</Card>*/}
       </div>
     </div>
   );

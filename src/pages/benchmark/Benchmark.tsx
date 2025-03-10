@@ -150,8 +150,8 @@ const Benchmark = (props: Props) => {
 
   return (
     <div className={"flex flex-col w-1/3 p-4"}>
-      <div className={"flex flex-col"}>
-        <div className={"flex flex-row items-center py-4"}>
+      <div className={"flex flex-col gap-lg"}>
+        <div className={"flex flex-row items-center"}>
           <p className={"w-1/2"}>Liczba elementów: </p>
           <Select
             isDisabled={props.dataHaveToBeTheSame}
@@ -187,32 +187,33 @@ const Benchmark = (props: Props) => {
           }
         >
           <p>Wyniki:</p>
-          <div className={"flex flex-col py-4 gap-lg"}>
-            {!algLoading ? (
-              <div className={"flex flex-col py-4 gap-sm"}>
-                <div className={"flex flex-row justify-between"}>
-                  <p>Czas trwania symulacji:</p>
-                  {firstResultData
-                    ? firstResultData.toString() + " s"
-                    : "brak danych"}
-                </div>
-                <div className={"flex flex-row justify-between"}>
-                  <p>Ilość porównań:</p>
-                  {numberOfCompare ? numberOfCompare.toString() : "brak danych"}
-                </div>
-                <div className={"flex flex-row justify-between"}>
-                  <p>Ilość zamian:</p>
-                  {numberOfSwaps ? numberOfSwaps.toString() : "brak danych"}
-                </div>
+          <div className={"flex flex-col py-4 gap-lg min-h-40"}>
+              <div className={"flex flex-col gap-lg"}>
+                {!algLoading ? (
+                    <div className={'flex flex-col gap-lg'}>
+                      <div className={"flex flex-row justify-between"}>
+                        <p>Czas trwania symulacji:</p>
+                        {firstResultData
+                            ? firstResultData.toString() + " s"
+                            : "brak danych"}
+                      </div>
+                      <div className={"flex flex-row justify-between"}>
+                        <p>Ilość porównań:</p>
+                        {numberOfCompare ? numberOfCompare.toString() : "brak danych"}
+                      </div>
+                      <div className={"flex flex-row justify-between"}>
+                        <p>Ilość zamian:</p>
+                        {numberOfSwaps ? numberOfSwaps.toString() : "brak danych"}
+                      </div>
+                    </div>
+                ): (
+                    <div
+                    className={"flex flex-row items-center justify-center gap-lg"}
+                >
+                  <p>Symulowanie...</p>
+                  <Spinner />
+                </div>)}
               </div>
-            ) : (
-              <div
-                className={"flex flex-row items-center justify-center gap-lg"}
-              >
-                <p>Symulowanie...</p>
-                <Spinner />
-              </div>
-            )}
           </div>
         </div>
       </div>

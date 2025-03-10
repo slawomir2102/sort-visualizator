@@ -159,7 +159,7 @@ const AboutPage = () => {
               <div className="flex-1 flex flex-col items-center justify-center">
                 <div className="w-full flex justify-center items-center max-w-md mb-4">
                   <Image
-                    src="../../../public/logo.png"
+                    src="/logo.png"
                     alt="Logo Politechniki Koszalińskiej"
                     className="object-contain"
                   />
