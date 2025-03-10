@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@nextui-org/react": "^2.6.11",za
+    "@nextui-org/react": "^2.6.11",
     "@nextui-org/system": "^2.4.6",
     "@nextui-org/theme": "^2.4.5",
     "@tailwindcss/vite": "^4.0.12",
