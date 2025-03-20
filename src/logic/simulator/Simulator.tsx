@@ -173,11 +173,11 @@ export function Simulator({
                       </div>
                       <div className={"flex flex-row gap-md"}>
                         <p className={"font-bold"}>Liczba zamian: </p>
+                        {simulator.getNumberOfSwaps}
                       </div>
                       <div className={"flex flex-row gap-md"}>
-                        <p className={"font-bold"}>
-                          Liczba kroków bez zamian:{" "}
-                        </p>
+                        <p className={"font-bold"}>Liczba porównań:</p>
+                        {simulator.getNumberOfCompare}
                       </div>
 
                       <div className={"flex flex-row gap-md"}></div>

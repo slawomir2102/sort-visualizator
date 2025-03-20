@@ -158,7 +158,7 @@ export abstract class Simulator {
   }
 
   public checkArrayIsSorted(): boolean {
-    if (!this.sortedArray) {
+    if (!this.sortedArray || this.sortedArray.length == 0) {
       return false;
     }
     const arrToCheck: number[] = this.sortedArray;

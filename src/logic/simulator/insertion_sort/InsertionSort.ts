@@ -35,6 +35,7 @@ export class InsertionSort extends Simulator {
     this.operations.push(operation);
   }
 
+  @MeasureExecutionTime
   public generateSimulatorSteps(): void {
     this.swapsCounter = 0;
     this.compareCounter = 0;
@@ -46,67 +47,52 @@ export class InsertionSort extends Simulator {
       const key = arr[i];
       let j = i - 1;
       let insertedPosition = i;
-
-      // Register key selection operation
       this.registerOperation({
         key: { index: i, value: key },
-        typeOperation: InsertionSortOperation.KeySelection, // Fixed: using SortOperation enum
+        typeOperation: InsertionSortOperation.KeySelection,
         sortedElements: {
           indexes: [...sortedIndexes],
           values: sortedIndexes.map((idx) => arr[idx]),
         },
       });
-
       while (
         j >= 0 &&
         (this.sortDirection === SortDirection.ASCENDING
           ? arr[j] > key
           : arr[j] < key)
       ) {
-        // Register comparison operation
         this.registerOperation({
           key: { index: i, value: key },
           comparedElement: { index: j, value: arr[j] },
-          typeOperation: InsertionSortOperation.Compare, // Fixed: using SortOperation enum
+          typeOperation: InsertionSortOperation.Compare,
           sortedElements: {
             indexes: [...sortedIndexes],
             values: sortedIndexes.map((idx) => arr[idx]),
           },
         });
         this.compareCounter++;
-
-        // Shift element to the right
         arr[j + 1] = arr[j];
-
-        // Register shift operation
         this.registerOperation({
           key: { index: i, value: key },
-          shiftedElement: { index: j, value: arr[j] }, // Fixed: singular not plural
+          shiftedElement: { index: j, value: arr[j] },
           newPosition: j + 1,
-          typeOperation: InsertionSortOperation.Shift, // Fixed: using SortOperation enum
+          typeOperation: InsertionSortOperation.Shift,
           sortedElements: {
             indexes: [...sortedIndexes],
             values: sortedIndexes.map((idx) => arr[idx]),
           },
         });
         this.swapsCounter++;
-
         insertedPosition = j;
         j--;
       }
-
       if (insertedPosition !== i) {
-        // Insert key at the correct position
         arr[insertedPosition] = key;
-
-        // Add insertedPosition to sortedIndexes
         sortedIndexes.push(insertedPosition);
-
-        // Register insert operation
         this.registerOperation({
           key: { index: i, value: key },
-          insertedPosition: insertedPosition, // Fixed: using insertedPosition instead of newPosition
-          typeOperation: InsertionSortOperation.Insert, // Fixed: using SortOperation enum
+          insertedPosition: insertedPosition,
+          typeOperation: InsertionSortOperation.Insert,
           sortedElements: {
             indexes: [...sortedIndexes],
             values: sortedIndexes.map((idx) => arr[idx]),
@@ -114,10 +100,7 @@ export class InsertionSort extends Simulator {
         });
         this.swapsCounter++;
       } else {
-        // If no insertion needed, add current index to sortedIndexes
         sortedIndexes.push(i);
-
-        // Update the last operation with new sortedElements
         const lastIndex = this.operations.length - 1;
         if (lastIndex >= 0) {
           this.operations[lastIndex].sortedElements = {
@@ -168,12 +151,9 @@ export class InsertionSort extends Simulator {
     this.compareCounter = 0;
     const arr: number[] = [...this.originalArray];
     const size: number = arr.length;
-
     for (let i = 1; i < size; i++) {
       const key = arr[i];
       let j = i - 1;
-
-      // Fixed sorting logic with proper direction handling
       while (
         j >= 0 &&
         (this.sortDirection === SortDirection.ASCENDING
@@ -185,11 +165,9 @@ export class InsertionSort extends Simulator {
         this.swapsCounter++;
         j--;
       }
-
       arr[j + 1] = key;
       this.swapsCounter++;
     }
-
     return arr;
   }
 

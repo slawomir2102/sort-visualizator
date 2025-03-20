@@ -53,11 +53,8 @@ export class SelectionSort extends Simulator {
     const arr: number[] = [...this.originalArray];
     const size: number = arr.length;
     const sortedIndexes: number[] = [];
-
     for (let i = 0; i < size - 1; i++) {
       let minIdx = i;
-
-      // Register current position operation
       this.registerOperation({
         currentIndex: { index: i, value: arr[i] },
         typeOperation: SelectionSortOperation.Compare,
@@ -66,15 +63,11 @@ export class SelectionSort extends Simulator {
           values: sortedIndexes.map((idx) => arr[idx]),
         },
       });
-
-      // Find the minimum element in unsorted part of array
       for (let j = i + 1; j < size; j++) {
         const isNewMinimum =
           this.sortDirection === SortDirection.ASCENDING
             ? arr[j] < arr[minIdx]
             : arr[j] > arr[minIdx];
-
-        // Register comparison operation
         this.registerOperation({
           currentIndex: { index: i, value: arr[i] },
           compareElement: { index: j, value: arr[j] },
@@ -86,11 +79,8 @@ export class SelectionSort extends Simulator {
           },
         });
         this.compareCounter++;
-
         if (isNewMinimum) {
           minIdx = j;
-
-          // Register selecting new minimum
           this.registerOperation({
             currentIndex: { index: i, value: arr[i] },
             minElement: { index: minIdx, value: arr[j] },
@@ -102,10 +92,7 @@ export class SelectionSort extends Simulator {
           });
         }
       }
-
-      // Swap the found minimum element with the first element if needed
       if (minIdx !== i) {
-        // Register swap operation before actually swapping
         this.registerOperation({
           currentIndex: { index: i, value: arr[i] },
           minElement: { index: minIdx, value: arr[minIdx] },
@@ -120,19 +107,11 @@ export class SelectionSort extends Simulator {
           },
         });
         this.swapsCounter++;
-
-        // Perform the swap
         this.swap(arr, minIdx, i);
       }
-
-      // After each complete iteration, mark the current index as sorted
       sortedIndexes.push(i);
     }
-
-    // Add the last element to sorted indexes after the loop completes
     sortedIndexes.push(size - 1);
-
-    // Add a final state showing all elements sorted
     this.registerOperation({
       currentIndex: { index: size - 1, value: arr[size - 1] },
       typeOperation: SelectionSortOperation.Compare,
@@ -141,9 +120,8 @@ export class SelectionSort extends Simulator {
         values: sortedIndexes.map((idx) => arr[idx]),
       },
     });
-
     this.setSortedArray(arr);
-    this.numberOfLastStep = this.operations.length - 1; // Important: set the number of last step
+    this.numberOfLastStep = this.operations.length - 1;
   }
 
   @MeasureExecutionTime
@@ -173,10 +151,8 @@ export class SelectionSort extends Simulator {
     this.compareCounter = 0;
     const arr: number[] = [...this.originalArray];
     const size: number = arr.length;
-
     for (let i = 0; i < size - 1; i++) {
       let minIdx = i;
-
       for (let j = i + 1; j < size; j++) {
         this.compareCounter++;
         if (
@@ -189,14 +165,11 @@ export class SelectionSort extends Simulator {
           minIdx = j;
         }
       }
-
-      // Swap the found minimum element with the first element
       if (minIdx !== i) {
         this.swap(arr, minIdx, i);
         this.swapsCounter++;
       }
     }
-
     return arr;
   }
 

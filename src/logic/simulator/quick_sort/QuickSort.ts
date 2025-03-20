@@ -57,16 +57,12 @@ export class QuickSort extends Simulator {
     const size: number = arr.length;
     const sortedIndexes: number[] = [];
 
-    // Uruchom główną funkcję quicksort
     this.quickSortSteps(arr, 0, size - 1, sortedIndexes);
 
     this.setSortedArray(arr);
-    this.numberOfLastStep = this.operations.length - 1; // Ważne: ustaw liczbę kroków
+    this.numberOfLastStep = this.operations.length - 1;
   }
 
-  /**
-   * Główna funkcja rekurencyjna QuickSort generująca kroki wizualizacji
-   */
   private quickSortSteps(
     arr: number[],
     low: number,
@@ -74,7 +70,6 @@ export class QuickSort extends Simulator {
     sortedIndexes: number[],
   ): void {
     if (low < high) {
-      // Zarejestruj wywołanie rekurencyjne
       this.registerOperation({
         partitionRange: { start: low, end: high },
         typeOperation: QuickSortOperation.RecursiveCall,
@@ -83,37 +78,24 @@ export class QuickSort extends Simulator {
           values: sortedIndexes.map((idx) => arr[idx]),
         },
       });
-
-      // Wywołaj partycjonowanie i uzyskaj indeks pivota
       const pivotIndex = this.partition(arr, low, high, sortedIndexes);
-
-      // Jeśli partycjonowanie się zakończyło, dodaj indeks pivota do posortowanych
       sortedIndexes.push(pivotIndex);
-
-      // Rekurencyjnie sortuj elementy przed i po pivocie
       this.quickSortSteps(arr, low, pivotIndex - 1, sortedIndexes);
       this.quickSortSteps(arr, pivotIndex + 1, high, sortedIndexes);
     } else if (low === high) {
-      // Jeśli partycja zawiera tylko jeden element, uznaj go za posortowany
       if (!sortedIndexes.includes(low)) {
         sortedIndexes.push(low);
       }
     }
   }
 
-  /**
-   * Funkcja partycjonująca, która wybiera pivot i dzieli tablicę
-   */
   private partition(
     arr: number[],
     low: number,
     high: number,
     sortedIndexes: number[],
   ): number {
-    // Wybierz pivot (w tym przypadku ostatni element)
     const pivotValue = arr[high];
-
-    // Zarejestruj wybór pivota
     this.registerOperation({
       pivotElement: { index: high, value: pivotValue },
       partitionRange: { start: low, end: high },
@@ -123,17 +105,12 @@ export class QuickSort extends Simulator {
         values: sortedIndexes.map((idx) => arr[idx]),
       },
     });
-
-    let i = low - 1; // Indeks mniejszego elementu
-
-    // Przejdź przez wszystkie elementy, porównaj je z pivotem
+    let i = low - 1;
     for (let j = low; j < high; j++) {
       const isSmaller =
         this.sortDirection === SortDirection.ASCENDING
           ? arr[j] < pivotValue
           : arr[j] > pivotValue;
-
-      // Zarejestruj porównanie
       this.registerOperation({
         pivotElement: { index: high, value: pivotValue },
         compareElement: { index: j, value: arr[j] },
@@ -145,13 +122,9 @@ export class QuickSort extends Simulator {
         },
       });
       this.compareCounter++;
-
       if (isSmaller) {
         i++;
-
-        // Zamień elementy jeśli znaleziono mniejszy element
         if (i !== j) {
-          // Zarejestruj zamianę
           this.registerOperation({
             pivotElement: { index: high, value: pivotValue },
             swappedElements: {
@@ -167,16 +140,10 @@ export class QuickSort extends Simulator {
           });
           this.swapsCounter++;
         }
-
-        // Wykonaj zamianę
         this.swap(arr, i, j);
       }
     }
-
-    // Umieść pivot na właściwej pozycji
     const pivotPosition = i + 1;
-
-    // Zarejestruj finalną zamianę pivota
     this.registerOperation({
       pivotElement: { index: high, value: pivotValue },
       swappedElements: {
@@ -191,11 +158,7 @@ export class QuickSort extends Simulator {
       },
     });
     this.swapsCounter++;
-
-    // Wykonaj zamianę
     this.swap(arr, pivotPosition, high);
-
-    // Zarejestruj zakończenie partycjonowania
     this.registerOperation({
       pivotElement: { index: pivotPosition, value: arr[pivotPosition] },
       partitionRange: { start: low, end: high },
